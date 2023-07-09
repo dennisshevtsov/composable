@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace IPatchable.Binding;
+namespace Patchable.Binding;
 
 /// <summary>
 /// The <see cref="PatchableModelBinderProvider"/> allows to create an instance of the

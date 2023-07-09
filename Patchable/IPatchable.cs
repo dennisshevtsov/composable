@@ -1,4 +1,4 @@
-﻿namespace IPatchable;
+﻿namespace Patchable;
 
 /// <summary>
 /// Inherit a model from the <see cref="IPatchable"/> if you need a model that binds to
