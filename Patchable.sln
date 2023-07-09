@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPatchable", "IPatchable\IPatchable.csproj", "{24661689-9B03-4781-9BC8-9C7A4B0B4137}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Patchable", "Patchable\Patchable.csproj", "{24661689-9B03-4781-9BC8-9C7A4B0B4137}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

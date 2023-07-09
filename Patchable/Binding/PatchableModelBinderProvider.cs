@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿// Copyright (c) Dennis Shevtsov. All rights reserved.
+// Licensed under the MIT License.
+// See LICENSE in the project root for license information.
 
-namespace IPatchable.Binding;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
+namespace Patchable.Binding;
 
 /// <summary>
 /// The <see cref="PatchableModelBinderProvider"/> allows to create an instance of the
