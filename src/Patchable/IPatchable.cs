@@ -12,7 +12,7 @@ namespace Patchable;
 public interface IPatchable
 {
   /// <summary>
-  /// Gets a list of properties that have been populated from the HTTP request.
+  /// A list of properties that have been populated from the HTTP request.
   /// </summary>
-  public string[] Properties { get; }
+  public string[] Properties { get; set; }
 }

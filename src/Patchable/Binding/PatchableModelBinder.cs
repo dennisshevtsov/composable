@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 // See LICENSE in the project root for license information.
 
+using System.ComponentModel;
+using System.Text.Json;
+
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Patchable.Binding;
@@ -14,8 +17,63 @@ namespace Patchable.Binding;
 /// </summary>
 public sealed class PatchableModelBinder : IModelBinder
 {
-  public Task BindModelAsync(ModelBindingContext bindingContext)
+  public async Task BindModelAsync(ModelBindingContext bindingContext)
   {
-    throw new NotImplementedException();
+    object? model;
+
+    if (bindingContext.HttpContext.Request.ContentLength != null &&
+        bindingContext.HttpContext.Request.ContentLength != 0)
+    {
+      model = await PatchableModelBinder.GetModelValue(bindingContext);
+    }
+    else
+    {
+      model = Activator.CreateInstance(bindingContext.ModelType);
+    }
+
+    foreach (var propertyMetadata in bindingContext.ModelMetadata.Properties)
+    {
+      object? routeValue;
+      TypeConverter? converter;
+
+      if (propertyMetadata != null &&
+          propertyMetadata.PropertySetter != null &&
+          propertyMetadata.PropertyName != null &&
+          (routeValue = bindingContext.ActionContext.RouteData.Values[propertyMetadata.PropertyName]) != null &&
+          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+      {
+        propertyMetadata.PropertySetter(model!, converter.ConvertFrom(routeValue));
+      }
+    }
+
+    bindingContext.Result = ModelBindingResult.Success(model);
+  }
+
+  private static async Task<object> GetModelValue(ModelBindingContext bindingContext)
+  {
+    JsonDocument? document = await JsonSerializer.DeserializeAsync<JsonDocument>(
+        bindingContext.HttpContext.Request.Body);
+
+    object model = document!.Deserialize(
+      bindingContext.ModelType,
+      new JsonSerializerOptions
+      {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+      })!;
+
+    if (model is IPatchable patchable)
+    {
+      ISet<string> properties =
+        document!.RootElement.EnumerateObject()!
+                             .Select(property => property.Name)
+                             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+      patchable.Properties =
+        bindingContext.ModelMetadata.Properties.Select(property => property.Name!)
+                                               .Where(property => properties.Contains(property))
+                                               .ToArray();
+    }
+
+    return model;
   }
 }
