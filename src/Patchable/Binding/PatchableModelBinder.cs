@@ -17,6 +17,11 @@ namespace Patchable.Binding;
 /// </summary>
 public sealed class PatchableModelBinder : IModelBinder
 {
+  /// <summary>
+  /// 
+  /// </summary>
+  /// <param name="bindingContext"></param>
+  /// <returns>An instance of the <see cref="Task"/> that r</returns>
   public async Task BindModelAsync(ModelBindingContext bindingContext)
   {
     object? model;
