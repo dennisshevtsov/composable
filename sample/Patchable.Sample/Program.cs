@@ -3,6 +3,7 @@
 // See LICENSE in the project root for license information.
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-WebApplication        app     = builder.Build();
+builder.Services.AddControllers(options => options.AddPatchable());
 
+WebApplication app = builder.Build();
 app.Run();
