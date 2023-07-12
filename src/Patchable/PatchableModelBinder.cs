@@ -45,7 +45,7 @@ public sealed class PatchableModelBinder : IModelBinder
                 propertyMetadata.PropertySetter != null &&
                 propertyMetadata.PropertyName != null &&
                 (routeValue = bindingContext.ActionContext.RouteData.Values[propertyMetadata.PropertyName]) != null &&
-                (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+                (converter  = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
             {
                 propertyMetadata.PropertySetter(model!, converter.ConvertFrom(routeValue));
             }
