@@ -24,18 +24,46 @@ public sealed class PatchableModelBinder : IModelBinder
   /// <returns>An instance of the <see cref="Task"/> that represents an asynchronous operation.</returns>
   public async Task BindModelAsync(ModelBindingContext bindingContext)
   {
-    object? model;
+    object model = Activator.CreateInstance(bindingContext.ModelType)!;
+    HashSet<string> properties = new();
 
-    if (bindingContext.HttpContext.Request.ContentLength != null &&
-        bindingContext.HttpContext.Request.ContentLength != 0)
+    await FillOutFromBodyAsync(model, properties, bindingContext);
+    FillOutFromRoute(model, properties, bindingContext);
+    FillOutFromQueryString(model, properties, bindingContext);
+
+    bindingContext.Result = ModelBindingResult.Success(model);
+  }
+
+  private async Task FillOutFromBodyAsync(object model, HashSet<string> properties, ModelBindingContext bindingContext)
+  {
+    if (bindingContext.HttpContext.Request.ContentLength == null &&
+        bindingContext.HttpContext.Request.ContentLength == 0)
     {
-      model = await GetModelValue(bindingContext);
-    }
-    else
-    {
-      model = Activator.CreateInstance(bindingContext.ModelType);
+      return;
     }
 
+    JsonDocument? document = await JsonSerializer.DeserializeAsync<JsonDocument>(
+        bindingContext.HttpContext.Request.Body);
+
+    if (document == null)
+    {
+      return;
+    }
+
+    foreach (var documentProperty in document.RootElement.EnumerateObject())
+    {
+      ModelMetadata? modelProperty = bindingContext.ModelMetadata.Properties[documentProperty.Name];
+
+      if (modelProperty != null && modelProperty.PropertySetter != null)
+      {
+        modelProperty.PropertySetter.Invoke(
+          modelProperty, documentProperty.Value.Deserialize(modelProperty.ModelType));
+      }
+    }
+  }
+
+  private void FillOutFromRoute(object model, HashSet<string> properties, ModelBindingContext bindingContext)
+  {
     foreach (var propertyMetadata in bindingContext.ModelMetadata.Properties)
     {
       object? routeValue;
@@ -50,37 +78,10 @@ public sealed class PatchableModelBinder : IModelBinder
         propertyMetadata.PropertySetter(model!, converter.ConvertFrom(routeValue));
       }
     }
-
-    bindingContext.Result = ModelBindingResult.Success(model);
   }
 
-  private static async Task<object> GetModelValue(ModelBindingContext bindingContext)
+  private void FillOutFromQueryString(object model, HashSet<string> properties, ModelBindingContext bindingContext)
   {
-    JsonDocument? document = await JsonSerializer.DeserializeAsync<JsonDocument>(
-        bindingContext.HttpContext.Request.Body);
-
-    object model = document!.Deserialize(
-      bindingContext.ModelType,
-      new JsonSerializerOptions
-      {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-      })!;
-
-    if (model is IPatchable patchable)
-    {
-      ISet<string> properties =
-        document!.RootElement.EnumerateObject()!
-                             .Select(property => property.Name)
-                             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-      patchable.Properties =
-        bindingContext.ModelMetadata.Properties.Select(property => property.Name!)
-                                               .Where(property => properties.Contains(property))
-                                               .ToArray();
-    }
-
-    return model;
+    // TODO: fill out model from query string
   }
-
-
 }
