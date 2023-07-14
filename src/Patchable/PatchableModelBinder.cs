@@ -58,7 +58,7 @@ public sealed class PatchableModelBinder : IModelBinder
       if (modelProperty != null && modelProperty.PropertySetter != null)
       {
         modelProperty.PropertySetter.Invoke(
-          modelProperty, documentProperty.Value.Deserialize(modelProperty.ModelType));
+          model, documentProperty.Value.Deserialize(modelProperty.ModelType));
       }
     }
   }
@@ -90,7 +90,6 @@ public sealed class PatchableModelBinder : IModelBinder
 
       if ((propertyMetadata = bindingContext.ModelMetadata.Properties[queryParam.Key]) != null &&
           propertyMetadata.PropertySetter != null &&
-          propertyMetadata.PropertyName != null &&
           (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
       {
         propertyMetadata.PropertySetter(model!, converter.ConvertFrom(queryParam.Value.ToString()));
