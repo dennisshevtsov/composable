@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Text.Json;
 
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Primitives;
 
 namespace Patchable;
 
@@ -82,6 +83,18 @@ public sealed class PatchableModelBinder : IModelBinder
 
   private void FillOutFromQueryString(object model, HashSet<string> properties, ModelBindingContext bindingContext)
   {
-    // TODO: fill out model from query string
+    foreach (KeyValuePair<string, StringValues> queryParam in bindingContext.HttpContext.Request.Query)
+    {
+      ModelMetadata? propertyMetadata;
+      TypeConverter? converter;
+
+      if ((propertyMetadata = bindingContext.ModelMetadata.Properties[queryParam.Key]) != null &&
+          propertyMetadata.PropertySetter != null &&
+          propertyMetadata.PropertyName != null &&
+          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+      {
+        propertyMetadata.PropertySetter(model!, converter.ConvertFrom(queryParam.Value.ToString()));
+      }
+    }
   }
 }
