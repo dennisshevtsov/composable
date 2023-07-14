@@ -65,7 +65,7 @@ public sealed class PatchableModelBinder : IModelBinder
 
   private void FillOutFromRoute(object model, HashSet<string> properties, ModelBindingContext bindingContext)
   {
-    foreach (var propertyMetadata in bindingContext.ModelMetadata.Properties)
+    foreach (ModelMetadata propertyMetadata in bindingContext.ModelMetadata.Properties)
     {
       object? routeValue;
       TypeConverter? converter;
