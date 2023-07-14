@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Text.Json;
 
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Primitives;
 
 namespace Patchable;
 
@@ -57,14 +58,14 @@ public sealed class PatchableModelBinder : IModelBinder
       if (modelProperty != null && modelProperty.PropertySetter != null)
       {
         modelProperty.PropertySetter.Invoke(
-          modelProperty, documentProperty.Value.Deserialize(modelProperty.ModelType));
+          model, documentProperty.Value.Deserialize(modelProperty.ModelType));
       }
     }
   }
 
   private void FillOutFromRoute(object model, HashSet<string> properties, ModelBindingContext bindingContext)
   {
-    foreach (var propertyMetadata in bindingContext.ModelMetadata.Properties)
+    foreach (ModelMetadata propertyMetadata in bindingContext.ModelMetadata.Properties)
     {
       object? routeValue;
       TypeConverter? converter;
@@ -82,6 +83,17 @@ public sealed class PatchableModelBinder : IModelBinder
 
   private void FillOutFromQueryString(object model, HashSet<string> properties, ModelBindingContext bindingContext)
   {
-    // TODO: fill out model from query string
+    foreach (KeyValuePair<string, StringValues> queryParam in bindingContext.HttpContext.Request.Query)
+    {
+      ModelMetadata? propertyMetadata;
+      TypeConverter? converter;
+
+      if ((propertyMetadata = bindingContext.ModelMetadata.Properties[queryParam.Key]) != null &&
+          propertyMetadata.PropertySetter != null &&
+          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+      {
+        propertyMetadata.PropertySetter(model!, converter.ConvertFrom(queryParam.Value.ToString()));
+      }
+    }
   }
 }
