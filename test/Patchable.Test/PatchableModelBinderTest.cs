@@ -22,6 +22,29 @@ public sealed class PatchableModelBinderTest
   }
 
   [TestMethod]
+  public void GetBinder_ModelNotInheritIPatchable_ReturnNull()
+  {
+    // Arrange
+    Mock<ModelBinderProviderContext> modelBinderProviderContextMock = new();
+    Mock<ModelMetadata> modelMetadataMock = new(
+        ModelMetadataIdentity.ForType(typeof(TestUnpatchableModel)));
+
+    modelMetadataMock.SetupGet(metadata => metadata.Properties)
+                     .Returns(new ModelPropertyCollection(Array.Empty<ModelMetadata>()));
+
+    modelBinderProviderContextMock.SetupGet(context => context.Metadata)
+                                  .Returns(modelMetadataMock.Object)
+                                  .Verifiable();
+
+    // Act
+    IModelBinder? modelBinder = _patchableModelBinderProvider.GetBinder(
+      modelBinderProviderContextMock.Object);
+
+    // Assert
+    Assert.IsNull(modelBinder);
+  }
+
+  [TestMethod]
   public void GetBinder_ModelInheritsIPatchable_ReturnPatchableBinder()
   {
     // Arrange
