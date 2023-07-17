@@ -6,5 +6,9 @@ namespace Patchable.Test;
 
 public sealed class TestPatchableModel : IPatchable
 {
+  public Guid Id { get; set; }
+
+  public string Name { get; set; } = string.Empty;
+
   public string[] Properties { get; set; } = Array.Empty<string>();
 }

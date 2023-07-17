@@ -37,7 +37,7 @@ public sealed class PatchableModelBinder : IModelBinder
 
   private async Task FillOutFromBodyAsync(object model, HashSet<string> properties, ModelBindingContext bindingContext)
   {
-    if (bindingContext.HttpContext.Request.ContentLength == null &&
+    if (bindingContext.HttpContext.Request.ContentLength == null ||
         bindingContext.HttpContext.Request.ContentLength == 0)
     {
       return;
