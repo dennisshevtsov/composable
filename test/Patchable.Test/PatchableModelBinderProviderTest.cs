@@ -9,7 +9,7 @@ using Moq;
 namespace Patchable.Test;
 
 [TestClass]
-public sealed class PatchableModelBinderTest
+public sealed class PatchableModelBinderProviderTest
 {
 #pragma warning disable CS8618
   private PatchableModelBinderProvider _patchableModelBinderProvider;
