@@ -11,4 +11,26 @@ public sealed class TestPatchableModel : IPatchable
   public string Name { get; set; } = string.Empty;
 
   public string[] Properties { get; set; } = Array.Empty<string>();
+
+  public override bool Equals(object? obj)
+  {
+    if (obj == null)
+    {
+      return false;
+    }
+
+    if (obj == this)
+    {
+      return true;
+    }
+
+    if (obj is TestPatchableModel model)
+    {
+      return Id == model.Id && Name == model.Name;
+    }
+
+    return false;
+  }
+
+  public override int GetHashCode() => HashCode.Combine(Id.GetHashCode(), Name.GetHashCode());
 }
