@@ -35,53 +35,20 @@ public sealed class PatchableModelBinderTest
     var modelId   = Guid.NewGuid().ToString();
     var modelName = Guid.NewGuid().ToString();
 
-    var actionContext = new ActionContext
+    ActionContext actionContext = new()
     {
-      RouteData = new RouteData
-      {
-        Values = {
-          { nameof(TestPatchableModel.Id)  , modelId   },
-          { nameof(TestPatchableModel.Name), modelName },
-        },
-      },
+      RouteData = new RouteData(),
     };
 
     modelBindingContextMock.SetupGet(context => context.ActionContext)
                            .Returns(actionContext)
                            .Verifiable();
 
-    var modelMetadataMock = new Mock<ModelMetadata>(
+    Mock<ModelMetadata> modelMetadataMock = new(
       ModelMetadataIdentity.ForType(typeof(TestPatchableModel)));
 
-    var modelIdMetadataMock = new Mock<ModelMetadata>(
-      ModelMetadataIdentity.ForProperty(
-        typeof(TestPatchableModel).GetProperty(nameof(TestPatchableModel.Id))!,
-        typeof(Guid),
-        typeof(TestPatchableModel)));
-
-    modelIdMetadataMock.SetupGet(metadata => metadata.PropertySetter)
-                        .Returns((object a, object? b) => { })
-                        .Verifiable();
-
-    var modelNameMetadataMock = new Mock<ModelMetadata>(
-      ModelMetadataIdentity.ForProperty(
-        typeof(TestPatchableModel).GetProperty(nameof(TestPatchableModel.Name))!,
-        typeof(Guid),
-        typeof(TestPatchableModel)));
-
-    modelNameMetadataMock.SetupGet(metadata => metadata.PropertySetter)
-                        .Returns((object a, object? b) => { })
-                        .Verifiable();
-
-    var properties = new ModelPropertyCollection(
-      new[]
-      {
-          modelIdMetadataMock.Object,
-          modelNameMetadataMock.Object,
-      });
-
     modelMetadataMock.Setup(metadata => metadata.Properties)
-                     .Returns(properties)
+                     .Returns(new ModelPropertyCollection(Array.Empty<ModelMetadata>()))
                      .Verifiable();
 
     modelBindingContextMock.SetupGet(context => context.ModelMetadata)
