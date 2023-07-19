@@ -95,7 +95,7 @@ public sealed class PatchableModelBinderTest
       Name = Guid.NewGuid().ToString(),
     };
 
-    var actionContext = new ActionContext
+    ActionContext actionContext = new()
     {
       RouteData = new RouteData
       {
@@ -110,30 +110,38 @@ public sealed class PatchableModelBinderTest
                            .Returns(actionContext)
                            .Verifiable();
 
-    var modelMetadataMock = new Mock<ModelMetadata>(
+    Mock<ModelMetadata> modelMetadataMock = new(
       ModelMetadataIdentity.ForType(typeof(TestPatchableModel)));
 
-    var modelIdMetadataMock = new Mock<ModelMetadata>(
+    Mock<Action<object, object?>> modelIdSetterMock = new();
+    modelIdSetterMock.Setup(setter => setter.Invoke(It.IsAny<object>(), It.IsAny<object?>()))
+                     .Verifiable();
+
+    Mock<ModelMetadata> modelIdMetadataMock = new(
       ModelMetadataIdentity.ForProperty(
         typeof(TestPatchableModel).GetProperty(nameof(TestPatchableModel.Id))!,
         typeof(Guid),
         typeof(TestPatchableModel)));
 
     modelIdMetadataMock.SetupGet(metadata => metadata.PropertySetter)
-                       .Returns((object a, object? b) => ((TestPatchableModel)a).Id = (Guid)b!)
+                       .Returns(modelIdSetterMock.Object)
                        .Verifiable();
 
-    var modelNameMetadataMock = new Mock<ModelMetadata>(
+    Mock<Action<object, object?>> modelNameSetterMock = new();
+    modelIdSetterMock.Setup(setter => setter.Invoke(It.IsAny<object>(), It.IsAny<object?>()))
+                     .Verifiable();
+
+    Mock<ModelMetadata> modelNameMetadataMock = new(
       ModelMetadataIdentity.ForProperty(
         typeof(TestPatchableModel).GetProperty(nameof(TestPatchableModel.Name))!,
         typeof(string),
         typeof(TestPatchableModel)));
 
     modelNameMetadataMock.SetupGet(metadata => metadata.PropertySetter)
-                         .Returns((object a, object? b) => ((TestPatchableModel)a).Name = (string)b!)
+                         .Returns(modelNameSetterMock.Object)
                          .Verifiable();
 
-    var properties = new ModelPropertyCollection(
+    ModelPropertyCollection properties = new(
       new[]
       {
           modelIdMetadataMock.Object,
@@ -171,6 +179,7 @@ public sealed class PatchableModelBinderTest
     await _patchableModelBinder.BindModelAsync(modelBindingContextMock.Object);
 
     // Assert
-    modelBindingContextMock.VerifySet(context => context.Result = It.Is<ModelBindingResult>(result => result.Model != null && result.Model.Equals(model)));
+    modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
+    modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
   }
 }
