@@ -127,6 +127,10 @@ public sealed class PatchableModelBinderTest
                        .Returns(modelIdSetterMock.Object)
                        .Verifiable();
 
+    Mock<Action<object, object?>> modelNameSetterMock = new();
+    modelIdSetterMock.Setup(setter => setter.Invoke(It.IsAny<object>(), It.IsAny<object?>()))
+                     .Verifiable();
+
     Mock<ModelMetadata> modelNameMetadataMock = new(
       ModelMetadataIdentity.ForProperty(
         typeof(TestPatchableModel).GetProperty(nameof(TestPatchableModel.Name))!,
@@ -134,7 +138,7 @@ public sealed class PatchableModelBinderTest
         typeof(TestPatchableModel)));
 
     modelNameMetadataMock.SetupGet(metadata => metadata.PropertySetter)
-                         .Returns((object a, object? b) => { })
+                         .Returns(modelNameSetterMock.Object)
                          .Verifiable();
 
     ModelPropertyCollection properties = new(
@@ -176,5 +180,6 @@ public sealed class PatchableModelBinderTest
 
     // Assert
     modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
+    modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
   }
 }
