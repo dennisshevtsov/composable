@@ -95,7 +95,7 @@ public sealed class PatchableModelBinderTest
       Name = Guid.NewGuid().ToString(),
     };
 
-    var actionContext = new ActionContext
+    ActionContext actionContext = new()
     {
       RouteData = new RouteData
       {
@@ -110,7 +110,7 @@ public sealed class PatchableModelBinderTest
                            .Returns(actionContext)
                            .Verifiable();
 
-    var modelMetadataMock = new Mock<ModelMetadata>(
+    Mock<ModelMetadata> modelMetadataMock = new(
       ModelMetadataIdentity.ForType(typeof(TestPatchableModel)));
 
     Mock<Action<object, object?>> modelIdSetterMock = new();
@@ -137,7 +137,7 @@ public sealed class PatchableModelBinderTest
                          .Returns((object a, object? b) => { })
                          .Verifiable();
 
-    var properties = new ModelPropertyCollection(
+    ModelPropertyCollection properties = new(
       new[]
       {
           modelIdMetadataMock.Object,
