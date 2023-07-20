@@ -32,9 +32,6 @@ public sealed class PatchableModelBinderTest
     modelBindingContextMock.SetupSet(context => context.Result = It.IsAny<ModelBindingResult>())
                            .Verifiable();
 
-    var modelId   = Guid.NewGuid().ToString();
-    var modelName = Guid.NewGuid().ToString();
-
     ActionContext actionContext = new()
     {
       RouteData = new RouteData(),
