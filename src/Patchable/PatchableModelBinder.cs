@@ -53,7 +53,8 @@ public sealed class PatchableModelBinder : IModelBinder
 
     foreach (var documentProperty in document.RootElement.EnumerateObject())
     {
-      ModelMetadata? modelProperty = bindingContext.ModelMetadata.Properties[documentProperty.Name];
+      ModelMetadata? modelProperty = bindingContext.ModelMetadata.Properties.FirstOrDefault(
+        property => string.Equals(property.Name, documentProperty.Name, StringComparison.OrdinalIgnoreCase));
 
       if (modelProperty != null && modelProperty.PropertySetter != null)
       {
