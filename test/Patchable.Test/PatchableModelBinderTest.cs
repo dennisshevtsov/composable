@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using System.Text.Json;
 
 namespace Patchable.Test;
 
@@ -365,6 +366,16 @@ public sealed class PatchableModelBinderTest
 
     httpRequestMock.SetupGet(context => context.Query)
                    .Returns(new QueryCollection())
+                   .Verifiable();
+
+    MemoryStream stream = new();
+    await JsonSerializer.SerializeAsync(stream, model, new JsonSerializerOptions
+    {
+      PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    });
+
+    httpRequestMock.SetupGet(context => context.Body)
+                   .Returns(stream)
                    .Verifiable();
 
     modelBindingContextMock.SetupGet(context => context.HttpContext)
