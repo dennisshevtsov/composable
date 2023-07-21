@@ -373,9 +373,14 @@ public sealed class PatchableModelBinderTest
     {
       PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     });
+    stream.Position = 0;
 
     httpRequestMock.SetupGet(context => context.Body)
                    .Returns(stream)
+                   .Verifiable();
+
+    httpRequestMock.SetupGet(context => context.ContentLength)
+                   .Returns(stream.Length)
                    .Verifiable();
 
     modelBindingContextMock.SetupGet(context => context.HttpContext)
