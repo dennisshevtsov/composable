@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 // See LICENSE in the project root for license information.
 
+using System.Text.Json;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -9,7 +11,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 using Moq;
-using System.Text.Json;
 
 namespace Patchable.Test;
 
@@ -17,31 +18,31 @@ namespace Patchable.Test;
 public sealed class PatchableModelBinderTest
 {
 #pragma warning disable CS8618
+  private Mock<ModelBindingContext> _modelBindingContextMock;
+
+  private Mock<HttpContext> _httpContextMock;
+  private Mock<HttpRequest> _httpRequestMock;
+
   private PatchableModelBinder _patchableModelBinder;
 #pragma warning restore CS8618
 
   [TestInitialize]
   public void Initialize()
   {
-    _patchableModelBinder = new PatchableModelBinder();
-  }
+    _modelBindingContextMock = new();
+    _modelBindingContextMock.SetupSet(context => context.Result = It.IsAny<ModelBindingResult>())
+                            .Verifiable();
 
-  [TestMethod]
-  public async Task BindModelAsync_NoBody_SetSuccessResult()
-  {
-    // Arrange
-    Mock<ModelBindingContext> modelBindingContextMock = new();
-    modelBindingContextMock.SetupSet(context => context.Result = It.IsAny<ModelBindingResult>())
-                           .Verifiable();
+    _httpContextMock = new Mock<HttpContext>();
+    _httpRequestMock = new Mock<HttpRequest>();
 
-    ActionContext actionContext = new()
-    {
-      RouteData = new RouteData(),
-    };
+    _httpContextMock.SetupGet(context => context.Request)
+                    .Returns(_httpRequestMock.Object)
+                    .Verifiable();
 
-    modelBindingContextMock.SetupGet(context => context.ActionContext)
-                           .Returns(actionContext)
-                           .Verifiable();
+    _modelBindingContextMock.SetupGet(context => context.HttpContext)
+                            .Returns(_httpContextMock.Object)
+                            .Verifiable();
 
     Mock<ModelMetadata> modelMetadataMock = new(
       ModelMetadataIdentity.ForType(typeof(TestPatchableModel)));
@@ -50,34 +51,42 @@ public sealed class PatchableModelBinderTest
                      .Returns(new ModelPropertyCollection(Array.Empty<ModelMetadata>()))
                      .Verifiable();
 
-    modelBindingContextMock.SetupGet(context => context.ModelMetadata)
-                           .Returns(modelMetadataMock.Object)
-                           .Verifiable();
+    _modelBindingContextMock.SetupGet(context => context.ModelMetadata)
+                            .Returns(modelMetadataMock.Object)
+                            .Verifiable();
 
-    modelBindingContextMock.SetupGet(context => context.ModelType)
-                           .Returns(modelMetadataMock.Object.ModelType)
-                           .Verifiable();
+    _modelBindingContextMock.SetupGet(context => context.ModelType)
+                            .Returns(modelMetadataMock.Object.ModelType)
+                            .Verifiable();
 
-    Mock<HttpContext> httpContextMock = new();
-    Mock<HttpRequest> httpRequestMock = new();
+    _patchableModelBinder = new PatchableModelBinder();
+  }
 
-    httpContextMock.SetupGet(context => context.Request)
-                   .Returns(httpRequestMock.Object)
-                   .Verifiable();
+  [TestMethod]
+  public async Task BindModelAsync_NoRouteNoQueryNoBody_SetSuccessResult()
+  {
+    // Arrange
 
-    httpRequestMock.SetupGet(context => context.Query)
-                   .Returns(new QueryCollection())
-                   .Verifiable();
+    // No route params
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(new ActionContext()
+                            {
+                              RouteData = new RouteData(),
+                            });
 
-    modelBindingContextMock.SetupGet(context => context.HttpContext)
-                           .Returns(httpContextMock.Object)
-                           .Verifiable();
+    // No query string params
+    _httpRequestMock.SetupGet(request => request.Query)
+                    .Returns(new QueryCollection());
+
+    // No body
+    _httpRequestMock.SetupGet(request => request.ContentLength)
+                    .Returns(0);
 
     // Act
-    await _patchableModelBinder.BindModelAsync(modelBindingContextMock.Object);
+    await _patchableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
 
     // Assert
-    modelBindingContextMock.VerifySet(context => context.Result = It.Is<ModelBindingResult>(result => result.IsModelSet));
+    _modelBindingContextMock.VerifySet(context => context.Result = It.Is<ModelBindingResult>(result => result.IsModelSet));
   }
 
   [TestMethod]
