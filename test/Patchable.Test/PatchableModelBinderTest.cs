@@ -369,10 +369,12 @@ public sealed class PatchableModelBinderTest
                    .Verifiable();
 
     MemoryStream stream = new();
-    await JsonSerializer.SerializeAsync(stream, model, new JsonSerializerOptions
+    JsonSerializerOptions options = new()
     {
       PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    });
+    };
+
+    await JsonSerializer.SerializeAsync(stream, model, options);
     stream.Position = 0;
 
     httpRequestMock.SetupGet(context => context.Body)
