@@ -214,86 +214,26 @@ public sealed class PatchableModelBinderTest
   public async Task BindModelAsync_Body_SetPropertiesFromBody()
   {
     // Arrange
-    Mock<ModelBindingContext> modelBindingContextMock = new();
-    modelBindingContextMock.SetupSet(context => context.Result = It.IsAny<ModelBindingResult>())
-                           .Verifiable();
-
     TestPatchableModel model = new()
     {
       Id = Guid.NewGuid(),
       Name = Guid.NewGuid().ToString(),
     };
 
-    ActionContext actionContext = new()
-    {
-      RouteData = new RouteData(),
-    };
+    // No route params
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(new ActionContext()
+                            {
+                              RouteData = new RouteData(),
+                            })
+                            .Verifiable();
 
-    modelBindingContextMock.SetupGet(context => context.ActionContext)
-                           .Returns(actionContext)
-                           .Verifiable();
-
-    Mock<ModelMetadata> modelMetadataMock = new(
-      ModelMetadataIdentity.ForType(typeof(TestPatchableModel)));
-
-    Mock<Action<object, object?>> modelIdSetterMock = new();
-    modelIdSetterMock.Setup(setter => setter.Invoke(It.IsAny<object>(), It.IsAny<object?>()))
-                     .Verifiable();
-
-    Mock<ModelMetadata> modelIdMetadataMock = new(
-      ModelMetadataIdentity.ForProperty(
-        typeof(TestPatchableModel).GetProperty(nameof(TestPatchableModel.Id))!,
-        typeof(Guid),
-        typeof(TestPatchableModel)));
-
-    modelIdMetadataMock.SetupGet(metadata => metadata.PropertySetter)
-                       .Returns(modelIdSetterMock.Object)
-                       .Verifiable();
-
-    Mock<Action<object, object?>> modelNameSetterMock = new();
-    modelIdSetterMock.Setup(setter => setter.Invoke(It.IsAny<object>(), It.IsAny<object?>()))
-                     .Verifiable();
-
-    Mock<ModelMetadata> modelNameMetadataMock = new(
-      ModelMetadataIdentity.ForProperty(
-        typeof(TestPatchableModel).GetProperty(nameof(TestPatchableModel.Name))!,
-        typeof(string),
-        typeof(TestPatchableModel)));
-
-    modelNameMetadataMock.SetupGet(metadata => metadata.PropertySetter)
-                         .Returns(modelNameSetterMock.Object)
-                         .Verifiable();
-
-    ModelPropertyCollection properties = new(
-      new[]
-      {
-          modelIdMetadataMock.Object,
-          modelNameMetadataMock.Object,
-      });
-
-    modelMetadataMock.Setup(metadata => metadata.Properties)
-                     .Returns(properties)
-                     .Verifiable();
-
-    modelBindingContextMock.SetupGet(context => context.ModelMetadata)
-                           .Returns(modelMetadataMock.Object)
-                           .Verifiable();
-
-    modelBindingContextMock.SetupGet(context => context.ModelType)
-                           .Returns(modelMetadataMock.Object.ModelType)
-                           .Verifiable();
-
-    Mock<HttpContext> httpContextMock = new();
-    Mock<HttpRequest> httpRequestMock = new();
-
-    httpContextMock.SetupGet(context => context.Request)
-                   .Returns(httpRequestMock.Object)
-                   .Verifiable();
-
-    httpRequestMock.SetupGet(context => context.Query)
-                   .Returns(new QueryCollection())
-                   .Verifiable();
-
+    // No query params
+    _httpRequestMock.SetupGet(context => context.Query)
+                    .Returns(new QueryCollection())
+                    .Verifiable();
+ 
+    // Set up body
     MemoryStream stream = new();
     JsonSerializerOptions options = new()
     {
@@ -303,23 +243,19 @@ public sealed class PatchableModelBinderTest
     await JsonSerializer.SerializeAsync(stream, model, options);
     stream.Position = 0;
 
-    httpRequestMock.SetupGet(context => context.Body)
-                   .Returns(stream)
-                   .Verifiable();
+    _httpRequestMock.SetupGet(context => context.Body)
+                    .Returns(stream)
+                    .Verifiable();
 
-    httpRequestMock.SetupGet(context => context.ContentLength)
-                   .Returns(stream.Length)
-                   .Verifiable();
-
-    modelBindingContextMock.SetupGet(context => context.HttpContext)
-                           .Returns(httpContextMock.Object)
-                           .Verifiable();
+    _httpRequestMock.SetupGet(context => context.ContentLength)
+                    .Returns(stream.Length)
+                    .Verifiable();
 
     // Act
-    await _patchableModelBinder.BindModelAsync(modelBindingContextMock.Object);
+    await _patchableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
 
     // Assert
-    modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
-    modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
+    _modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
+    _modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
   }
 }
