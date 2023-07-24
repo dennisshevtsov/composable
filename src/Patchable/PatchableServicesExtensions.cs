@@ -19,6 +19,7 @@ public static class PatchableServicesExtensions
   /// <param name="options">An instance of the <see cref="MvcOptions"/> that provides programmatic configuration for the MVC framework.</param>
   public static void AddPatchable(this MvcOptions options)
   {
-    options.ModelBinderProviders.Insert(0, new PatchableModelBinderProvider());
+    options.ModelBinderProviders.Insert(0, new ComposableModelBinderProvider());
+    options.ModelBinderProviders.Insert(1, new PatchableModelBinderProvider());
   }
 }
