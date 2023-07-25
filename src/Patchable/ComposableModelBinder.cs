@@ -15,7 +15,7 @@ namespace Patchable;
 /// of a model that implements the <see cref="IComposable"/> from HTTP request. The binder
 /// allows to bind parameters from the body, the route and the query string of the HTTP.
 /// </summary>
-public sealed class ComposableModelBinder : IModelBinder
+public class ComposableModelBinder : IModelBinder
 {
   /// <summary>
   /// Attempts to bind a model.
