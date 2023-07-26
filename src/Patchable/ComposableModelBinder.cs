@@ -96,7 +96,7 @@ public class ComposableModelBinder : IModelBinder
     }
   }
 
-  private IDictionary<string, ModelMetadata> GetProperties(ModelBindingContext bindingContext)
+  private Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
   {
     Dictionary<string, ModelMetadata> properties = new();
 
@@ -111,5 +111,42 @@ public class ComposableModelBinder : IModelBinder
     }
 
     return properties;
+  }
+
+  private Dictionary<string, object> GetPropertyValues(
+    Dictionary<string, ModelMetadata> metadata,
+    ModelBindingContext bindingContext)
+  {
+    Dictionary<string, object> values = new();
+
+    AddPropertyValuesFromBody(values, metadata, bindingContext);
+    AddPropertyValuesFromRoute(values, metadata, bindingContext);
+    AddPropertyValuesFromQuery(values, metadata, bindingContext);
+
+    return values;
+  }
+
+  private void AddPropertyValuesFromBody(
+    Dictionary<string, object> values,
+    Dictionary<string, ModelMetadata> metadata,
+    ModelBindingContext bindingContext)
+  {
+
+  }
+
+  private void AddPropertyValuesFromRoute(
+    Dictionary<string, object> values,
+    Dictionary<string, ModelMetadata> metadata,
+    ModelBindingContext bindingContext)
+  {
+
+  }
+
+  private void AddPropertyValuesFromQuery(
+    Dictionary<string, object> values,
+    Dictionary<string, ModelMetadata> metadata,
+    ModelBindingContext bindingContext)
+  {
+
   }
 }
