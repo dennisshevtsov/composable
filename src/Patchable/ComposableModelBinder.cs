@@ -5,7 +5,9 @@
 using System.ComponentModel;
 using System.Text.Json;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 
 namespace Patchable;
@@ -26,72 +28,112 @@ public class ComposableModelBinder : IModelBinder
   {
     object model = Activator.CreateInstance(bindingContext.ModelType)!;
 
-    await FillOutFromBodyAsync(model, bindingContext);
-    FillOutFromRoute(model, bindingContext);
-    FillOutFromQueryString(model, bindingContext);
+    Dictionary<string, ModelMetadata> metadata = GetPropertyMetadata(bindingContext);
+    Dictionary<string, object?> values = await GetPropertyValuesAsync(metadata, bindingContext);
+
+    foreach (var value in values)
+    {
+      metadata[value.Key].PropertySetter!.Invoke(model, value.Value);
+    }
 
     bindingContext.Result = ModelBindingResult.Success(model);
   }
 
-  private async Task FillOutFromBodyAsync(object model, ModelBindingContext bindingContext)
+  private Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
   {
-    if (bindingContext.HttpContext.Request.ContentLength == null ||
-        bindingContext.HttpContext.Request.ContentLength == 0)
+    Dictionary<string, ModelMetadata> properties = new(StringComparer.OrdinalIgnoreCase);
+
+    for (int i = 0; i < bindingContext.ModelMetadata.Properties.Count; i++)
+    {
+      ModelMetadata property = bindingContext.ModelMetadata.Properties[i];
+
+      if (property.PropertySetter != null && property.PropertyName != null)
+      {
+        properties.Add(property.PropertyName, property);
+      }
+    }
+
+    return properties;
+  }
+
+  private async Task<Dictionary<string, object?>> GetPropertyValuesAsync(
+    Dictionary<string, ModelMetadata> metadata,
+    ModelBindingContext bindingContext)
+  {
+    Dictionary<string, object?> values = new(StringComparer.OrdinalIgnoreCase);
+
+    await AddPropertyValuesFromBodyAsync(values, metadata, bindingContext.HttpContext.Request);
+    AddPropertyValuesFromRoute(values, metadata, bindingContext.ActionContext.RouteData.Values);
+    AddPropertyValuesFromQuery(values, metadata, bindingContext.HttpContext.Request.Query);
+
+    return values;
+  }
+
+  private async Task AddPropertyValuesFromBodyAsync(
+    Dictionary<string, object?> values,
+    Dictionary<string, ModelMetadata> metadata,
+    HttpRequest request)
+  {
+    if (request.ContentLength == null || request.ContentLength == 0)
     {
       return;
     }
 
     JsonDocument? document = await JsonSerializer.DeserializeAsync<JsonDocument>(
-        bindingContext.HttpContext.Request.Body);
+        request.Body);
 
     if (document == null)
     {
       return;
     }
 
-    foreach (var documentProperty in document.RootElement.EnumerateObject())
+    foreach (JsonProperty documentProperty in document.RootElement.EnumerateObject())
     {
-      ModelMetadata? modelProperty = bindingContext.ModelMetadata.Properties.FirstOrDefault(
-        property => string.Equals(property.Name, documentProperty.Name, StringComparison.OrdinalIgnoreCase));
+      ModelMetadata? propertyMetadata;
 
-      if (modelProperty != null && modelProperty.PropertySetter != null)
+      if (metadata.TryGetValue(documentProperty.Name, out propertyMetadata))
       {
-        modelProperty.PropertySetter.Invoke(
-          model, documentProperty.Value.Deserialize(modelProperty.ModelType));
+        values[documentProperty.Name] =
+          documentProperty.Value.Deserialize(propertyMetadata.ModelType);
       }
     }
   }
 
-  private void FillOutFromRoute(object model, ModelBindingContext bindingContext)
+  private void AddPropertyValuesFromRoute(
+    Dictionary<string, object?> values,
+    Dictionary<string, ModelMetadata> metadata,
+    RouteValueDictionary routeValues)
   {
-    foreach (ModelMetadata propertyMetadata in bindingContext.ModelMetadata.Properties)
-    {
-      object? routeValue;
-      TypeConverter? converter;
-
-      if (propertyMetadata != null &&
-          propertyMetadata.PropertySetter != null &&
-          propertyMetadata.PropertyName != null &&
-          (routeValue = bindingContext.ActionContext.RouteData.Values[propertyMetadata.PropertyName]) != null &&
-          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
-      {
-        propertyMetadata.PropertySetter(model!, converter.ConvertFrom(routeValue));
-      }
-    }
-  }
-
-  private void FillOutFromQueryString(object model, ModelBindingContext bindingContext)
-  {
-    foreach (KeyValuePair<string, StringValues> queryParam in bindingContext.HttpContext.Request.Query)
+    foreach (KeyValuePair<string, object?> routeParam in routeValues)
     {
       ModelMetadata? propertyMetadata;
       TypeConverter? converter;
 
-      if ((propertyMetadata = bindingContext.ModelMetadata.Properties[queryParam.Key]) != null &&
+      if (routeParam.Value != null &&
+          metadata.TryGetValue(routeParam.Key, out propertyMetadata) &&
           propertyMetadata.PropertySetter != null &&
           (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
       {
-        propertyMetadata.PropertySetter(model!, converter.ConvertFrom(queryParam.Value.ToString()));
+        values[routeParam.Key] = converter.ConvertFrom(routeParam.Value.ToString()!);
+      }
+    }
+  }
+
+  private void AddPropertyValuesFromQuery(
+    Dictionary<string, object?> values,
+    Dictionary<string, ModelMetadata> metadata,
+    IQueryCollection querystring)
+  {
+    foreach (KeyValuePair<string, StringValues> param in querystring)
+    {
+      ModelMetadata? propertyMetadata;
+      TypeConverter? converter;
+
+      if (metadata.TryGetValue(param.Key, out propertyMetadata) &&
+          propertyMetadata.PropertySetter != null &&
+          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+      {
+        values[param.Key] = converter.ConvertFrom(param.Value.ToString());
       }
     }
   }
