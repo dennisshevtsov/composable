@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 // See LICENSE in the project root for license information.
 
+using System;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
@@ -115,48 +116,54 @@ public class ComposableModelBinder : IModelBinder
     return properties;
   }
 
-  private Dictionary<string, object?> GetPropertyValues(
+  private async Task<Dictionary<string, object?>> GetPropertyValues(
     Dictionary<string, ModelMetadata> metadata,
     ModelBindingContext bindingContext)
   {
     Dictionary<string, object?> values = new(StringComparer.OrdinalIgnoreCase);
 
-    AddPropertyValuesFromBody(values, metadata, bindingContext);
-    AddPropertyValuesFromRoute(values, metadata, bindingContext);
+    await AddPropertyValuesFromBodyAsync(values, metadata, bindingContext.HttpContext.Request);
+    AddPropertyValuesFromRoute(values, metadata, bindingContext.ActionContext.RouteData.Values);
     AddPropertyValuesFromQuery(values, metadata, bindingContext.HttpContext.Request.Query);
 
     return values;
   }
 
-  private void AddPropertyValuesFromBody(
+  private async Task AddPropertyValuesFromBodyAsync(
     Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
-    ModelBindingContext bindingContext)
+    HttpRequest request)
   {
+    if (request.ContentLength == null || request.ContentLength == 0)
+    {
+      return;
+    }
 
+    JsonDocument? document = await JsonSerializer.DeserializeAsync<JsonDocument>(
+        request.Body);
+
+    if (document == null)
+    {
+      return;
+    }
+
+    foreach (JsonProperty documentProperty in document.RootElement.EnumerateObject())
+    {
+      ModelMetadata? modelProperty = metadata[documentProperty.Name];
+
+      if (modelProperty != null && modelProperty.PropertySetter != null)
+      {
+        values[documentProperty.Name] =
+          documentProperty.Value.Deserialize(modelProperty.ModelType);
+      }
+    }
   }
 
   private void AddPropertyValuesFromRoute(
     Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
-    RouteValueDictionary routeValues,
-    ModelBindingContext bindingContext)
+    RouteValueDictionary routeValues)
   {
-    foreach (ModelMetadata propertyMetadata in bindingContext.ModelMetadata.Properties)
-    {
-      object? routeValue;
-      TypeConverter? converter;
-
-      if (propertyMetadata != null &&
-          propertyMetadata.PropertySetter != null &&
-          propertyMetadata.PropertyName != null &&
-          (routeValue = routeValues[propertyMetadata.PropertyName]) != null &&
-          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
-      {
-        propertyMetadata.PropertySetter(model!, converter.ConvertFrom(routeValue));
-      }
-    }
-
     foreach (KeyValuePair<string, object?> routeParam in routeValues)
     {
       ModelMetadata? propertyMetadata;
@@ -167,7 +174,7 @@ public class ComposableModelBinder : IModelBinder
           propertyMetadata.PropertySetter != null &&
           (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
       {
-        values[routeParam.Key] = converter.ConvertFrom(routeParam.Value.ToString());
+        values[routeParam.Key] = converter.ConvertFrom(routeParam.Value.ToString()!);
       }
     }
   }
