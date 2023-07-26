@@ -90,12 +90,12 @@ public class ComposableModelBinder : IModelBinder
 
     foreach (JsonProperty documentProperty in document.RootElement.EnumerateObject())
     {
-      ModelMetadata? modelProperty = metadata[documentProperty.Name];
+      ModelMetadata? propertyMetadata;
 
-      if (modelProperty != null && modelProperty.PropertySetter != null)
+      if (metadata.TryGetValue(documentProperty.Name, out propertyMetadata))
       {
         values[documentProperty.Name] =
-          documentProperty.Value.Deserialize(modelProperty.ModelType);
+          documentProperty.Value.Deserialize(propertyMetadata.ModelType);
       }
     }
   }
@@ -111,7 +111,7 @@ public class ComposableModelBinder : IModelBinder
       TypeConverter? converter;
 
       if (routeParam.Value != null &&
-          (propertyMetadata = metadata[routeParam.Key]) != null &&
+          metadata.TryGetValue(routeParam.Key, out propertyMetadata) &&
           propertyMetadata.PropertySetter != null &&
           (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
       {
@@ -130,7 +130,7 @@ public class ComposableModelBinder : IModelBinder
       ModelMetadata? propertyMetadata;
       TypeConverter? converter;
 
-      if ((propertyMetadata = metadata[param.Key]) != null &&
+      if (metadata.TryGetValue(param.Key, out propertyMetadata) &&
           propertyMetadata.PropertySetter != null &&
           (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
       {
