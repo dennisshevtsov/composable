@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 
 namespace Patchable;
@@ -138,9 +139,37 @@ public class ComposableModelBinder : IModelBinder
   private void AddPropertyValuesFromRoute(
     Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
+    RouteValueDictionary routeValues,
     ModelBindingContext bindingContext)
   {
+    foreach (ModelMetadata propertyMetadata in bindingContext.ModelMetadata.Properties)
+    {
+      object? routeValue;
+      TypeConverter? converter;
 
+      if (propertyMetadata != null &&
+          propertyMetadata.PropertySetter != null &&
+          propertyMetadata.PropertyName != null &&
+          (routeValue = routeValues[propertyMetadata.PropertyName]) != null &&
+          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+      {
+        propertyMetadata.PropertySetter(model!, converter.ConvertFrom(routeValue));
+      }
+    }
+
+    foreach (KeyValuePair<string, object?> routeParam in routeValues)
+    {
+      ModelMetadata? propertyMetadata;
+      TypeConverter? converter;
+
+      if (routeParam.Value != null &&
+          (propertyMetadata = metadata[routeParam.Key]) != null &&
+          propertyMetadata.PropertySetter != null &&
+          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+      {
+        values[routeParam.Key] = converter.ConvertFrom(routeParam.Value.ToString());
+      }
+    }
   }
 
   private void AddPropertyValuesFromQuery(
