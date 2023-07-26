@@ -95,4 +95,21 @@ public class ComposableModelBinder : IModelBinder
       }
     }
   }
+
+  private IDictionary<string, ModelMetadata> GetProperties(ModelBindingContext bindingContext)
+  {
+    Dictionary<string, ModelMetadata> properties = new();
+
+    for (int i = 0; i < bindingContext.ModelMetadata.Properties.Count; i++)
+    {
+      ModelMetadata property = bindingContext.ModelMetadata.Properties[i];
+
+      if (property.PropertySetter != null && property.PropertyName != null)
+      {
+        properties.Add(property.PropertyName, property);
+      }
+    }
+
+    return properties;
+  }
 }
