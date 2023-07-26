@@ -3,8 +3,9 @@
 // See LICENSE in the project root for license information.
 
 using System.ComponentModel;
+using System.Reflection;
 using System.Text.Json;
-
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Primitives;
 
@@ -98,7 +99,7 @@ public class ComposableModelBinder : IModelBinder
 
   private Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
   {
-    Dictionary<string, ModelMetadata> properties = new();
+    Dictionary<string, ModelMetadata> properties = new(StringComparer.OrdinalIgnoreCase);
 
     for (int i = 0; i < bindingContext.ModelMetadata.Properties.Count; i++)
     {
@@ -113,21 +114,21 @@ public class ComposableModelBinder : IModelBinder
     return properties;
   }
 
-  private Dictionary<string, object> GetPropertyValues(
+  private Dictionary<string, object?> GetPropertyValues(
     Dictionary<string, ModelMetadata> metadata,
     ModelBindingContext bindingContext)
   {
-    Dictionary<string, object> values = new();
+    Dictionary<string, object?> values = new(StringComparer.OrdinalIgnoreCase);
 
     AddPropertyValuesFromBody(values, metadata, bindingContext);
     AddPropertyValuesFromRoute(values, metadata, bindingContext);
-    AddPropertyValuesFromQuery(values, metadata, bindingContext);
+    AddPropertyValuesFromQuery(values, metadata, bindingContext.HttpContext.Request.Query);
 
     return values;
   }
 
   private void AddPropertyValuesFromBody(
-    Dictionary<string, object> values,
+    Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
     ModelBindingContext bindingContext)
   {
@@ -135,7 +136,7 @@ public class ComposableModelBinder : IModelBinder
   }
 
   private void AddPropertyValuesFromRoute(
-    Dictionary<string, object> values,
+    Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
     ModelBindingContext bindingContext)
   {
@@ -143,10 +144,21 @@ public class ComposableModelBinder : IModelBinder
   }
 
   private void AddPropertyValuesFromQuery(
-    Dictionary<string, object> values,
+    Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
-    ModelBindingContext bindingContext)
+    IQueryCollection querystring)
   {
+    foreach (KeyValuePair<string, StringValues> param in querystring)
+    {
+      ModelMetadata? propertyMetadata;
+      TypeConverter? converter;
 
+      if ((propertyMetadata = metadata[param.Key]) != null &&
+          propertyMetadata.PropertySetter != null &&
+          (converter = TypeDescriptor.GetConverter(propertyMetadata.ModelType)) != null)
+      {
+        values[param.Key] = converter.ConvertFrom(param.Value.ToString());
+      }
+    }
   }
 }
