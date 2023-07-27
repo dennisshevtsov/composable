@@ -20,4 +20,27 @@ public sealed class ComposableModelBinderProviderTest
   {
     _composableModelBinderProvider = new ComposableModelBinderProvider();
   }
+
+  [TestMethod]
+  public void GetBinder_NotInheritIComposable_ReturnNull()
+  {
+    // Arrange
+    Mock<ModelBinderProviderContext> modelBinderProviderContextMock = new();
+    Mock<ModelMetadata> modelMetadataMock = new(
+        ModelMetadataIdentity.ForType(typeof(TestUncomposableModel)));
+
+    modelMetadataMock.SetupGet(metadata => metadata.Properties)
+                     .Returns(new ModelPropertyCollection(Array.Empty<ModelMetadata>()));
+
+    modelBinderProviderContextMock.SetupGet(context => context.Metadata)
+                                  .Returns(modelMetadataMock.Object)
+                                  .Verifiable();
+
+    // Act
+    IModelBinder? modelBinder = _composableModelBinderProvider.GetBinder(
+      modelBinderProviderContextMock.Object);
+
+    // Assert
+    Assert.IsNull(modelBinder);
+  }
 }
