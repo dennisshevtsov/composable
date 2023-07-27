@@ -22,7 +22,7 @@ public sealed class ComposableModelBinderProviderTest
   }
 
   [TestMethod]
-  public void GetBinder_NotInheritIComposable_ReturnNull()
+  public void GetBinder_ModelNotInheritIComposable_ReturnNull()
   {
     // Arrange
     Mock<ModelBinderProviderContext> modelBinderProviderContextMock = new();
@@ -42,5 +42,29 @@ public sealed class ComposableModelBinderProviderTest
 
     // Assert
     Assert.IsNull(modelBinder);
+  }
+
+  [TestMethod]
+  public void GetBinder_ModelInheritsIComposable_ReturnPatchableBinder()
+  {
+    // Arrange
+    Mock<ModelBinderProviderContext> modelBinderProviderContextMock = new();
+    Mock<ModelMetadata> modelMetadataMock = new(
+        ModelMetadataIdentity.ForType(typeof(TestComposableModel)));
+
+    modelMetadataMock.SetupGet(metadata => metadata.Properties)
+                     .Returns(new ModelPropertyCollection(Array.Empty<ModelMetadata>()));
+
+    modelBinderProviderContextMock.SetupGet(context => context.Metadata)
+                                  .Returns(modelMetadataMock.Object)
+                                  .Verifiable();
+
+    // Act
+    IModelBinder? modelBinder = _composableModelBinderProvider.GetBinder(
+      modelBinderProviderContextMock.Object);
+
+    // Assert
+    Assert.IsNotNull(modelBinder);
+    Assert.IsInstanceOfType<ComposableModelBinder>(modelBinder);
   }
 }
