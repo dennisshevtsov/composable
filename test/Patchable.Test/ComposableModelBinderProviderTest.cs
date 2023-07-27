@@ -11,4 +11,13 @@ namespace Patchable.Test;
 [TestClass]
 public sealed class ComposableModelBinderProviderTest
 {
+#pragma warning disable CS8618
+  private ComposableModelBinderProvider _composableModelBinderProvider;
+#pragma warning restore CS8618
+
+  [TestInitialize]
+  public void Initialize()
+  {
+    _composableModelBinderProvider = new ComposableModelBinderProvider();
+  }
 }
