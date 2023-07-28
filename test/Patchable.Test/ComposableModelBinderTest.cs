@@ -8,12 +8,12 @@ namespace Patchable.Test;
 public sealed class ComposableModelBinderTest
 {
 #pragma warning disable CS8618
-  private PatchableModelBinder _patchableModelBinder;
+  private ComposableModelBinder _composableModelBinder;
 #pragma warning restore CS8618
 
   [TestInitialize]
   public void Initialize()
   {
-    _patchableModelBinder = new PatchableModelBinder();
+    _composableModelBinder = new ComposableModelBinder();
   }
 }
