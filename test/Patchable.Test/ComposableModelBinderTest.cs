@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Moq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace Patchable.Test;
 
@@ -93,5 +95,32 @@ public sealed class ComposableModelBinderTest
                             .Verifiable();
 
     _composableModelBinder = new ComposableModelBinder();
+  }
+
+  [TestMethod]
+  public async Task BindModelAsync_NoRouteNoQueryNoBody_SetSuccessResult()
+  {
+    // Arrange
+
+    // No route params
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(new ActionContext()
+                            {
+                              RouteData = new RouteData(),
+                            });
+
+    // No query string params
+    _httpRequestMock.SetupGet(request => request.Query)
+                    .Returns(new QueryCollection());
+
+    // No body
+    _httpRequestMock.SetupGet(request => request.ContentLength)
+                    .Returns(0);
+
+    // Act
+    await _composableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
+
+    // Assert
+    _modelBindingContextMock.VerifySet(context => context.Result = It.Is<ModelBindingResult>(result => result.IsModelSet));
   }
 }
