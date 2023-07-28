@@ -9,6 +9,7 @@ using Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
+using System.Text.Json;
 
 namespace Patchable.Test;
 
@@ -199,6 +200,55 @@ public sealed class ComposableModelBinderTest
     // No body
     _httpRequestMock.SetupGet(request => request.ContentLength)
                     .Returns(0);
+
+    // Act
+    await _composableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
+
+    // Assert
+    _modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
+    _modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
+  }
+
+  [TestMethod]
+  public async Task BindModelAsync_Body_SetPropertiesFromBody()
+  {
+    // Arrange
+    TestComposableModel model = new()
+    {
+      Id = Guid.NewGuid(),
+      Name = Guid.NewGuid().ToString(),
+    };
+
+    // No route params
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(new ActionContext()
+                            {
+                              RouteData = new RouteData(),
+                            })
+                            .Verifiable();
+
+    // No query params
+    _httpRequestMock.SetupGet(context => context.Query)
+                    .Returns(new QueryCollection())
+                    .Verifiable();
+
+    // Set up body
+    MemoryStream stream = new();
+    JsonSerializerOptions options = new()
+    {
+      PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+    await JsonSerializer.SerializeAsync(stream, model, options);
+    stream.Position = 0;
+
+    _httpRequestMock.SetupGet(context => context.Body)
+                    .Returns(stream)
+                    .Verifiable();
+
+    _httpRequestMock.SetupGet(context => context.ContentLength)
+                    .Returns(stream.Length)
+                    .Verifiable();
 
     // Act
     await _composableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
