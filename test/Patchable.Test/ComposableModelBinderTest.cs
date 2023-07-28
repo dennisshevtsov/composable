@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Primitives;
 
 namespace Patchable.Test;
 
@@ -152,6 +153,48 @@ public sealed class ComposableModelBinderTest
     // No query params
     _httpRequestMock.SetupGet(context => context.Query)
                     .Returns(new QueryCollection());
+
+    // No body
+    _httpRequestMock.SetupGet(request => request.ContentLength)
+                    .Returns(0);
+
+    // Act
+    await _composableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
+
+    // Assert
+    _modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
+    _modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
+  }
+
+  [TestMethod]
+  public async Task BindModelAsync_QueryStringParams_SetPropertiesFromString()
+  {
+    // Arrange
+    TestComposableModel model = new()
+    {
+      Id = Guid.NewGuid(),
+      Name = Guid.NewGuid().ToString(),
+    };
+
+    // No route params
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(new ActionContext()
+                            {
+                              RouteData = new RouteData(),
+                            })
+                            .Verifiable();
+
+    // Set up query string
+    QueryCollection queryCollection = new(
+      new Dictionary<string, StringValues>
+      {
+        { nameof(TestComposableModel.Id)  , model.Id.ToString() },
+        { nameof(TestComposableModel.Name), model.Name          },
+      });
+
+    _httpRequestMock.SetupGet(context => context.Query)
+                    .Returns(queryCollection)
+                    .Verifiable();
 
     // No body
     _httpRequestMock.SetupGet(request => request.ContentLength)
