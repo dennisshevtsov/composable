@@ -123,4 +123,45 @@ public sealed class ComposableModelBinderTest
     // Assert
     _modelBindingContextMock.VerifySet(context => context.Result = It.Is<ModelBindingResult>(result => result.IsModelSet));
   }
+
+  [TestMethod]
+  public async Task BindModelAsync_RouteParams_SetPropertiesFromRoute()
+  {
+    // Arrange
+    TestComposableModel model = new()
+    {
+      Id = Guid.NewGuid(),
+      Name = Guid.NewGuid().ToString(),
+    };
+
+    // Set up route params
+    ActionContext actionContext = new()
+    {
+      RouteData = new RouteData
+      {
+        Values = {
+          { nameof(TestComposableModel.Id)  , model.Id.ToString() },
+          { nameof(TestComposableModel.Name), model.Name          },
+        },
+      },
+    };
+
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(actionContext);
+
+    // No query params
+    _httpRequestMock.SetupGet(context => context.Query)
+                    .Returns(new QueryCollection());
+
+    // No body
+    _httpRequestMock.SetupGet(request => request.ContentLength)
+                    .Returns(0);
+
+    // Act
+    await _composableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
+
+    // Assert
+    _modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
+    _modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
+  }
 }
