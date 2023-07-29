@@ -39,7 +39,7 @@ public class ComposableModelBinder : IModelBinder
     bindingContext.Result = ModelBindingResult.Success(model);
   }
 
-  private Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
+  protected Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
   {
     Dictionary<string, ModelMetadata> properties = new(StringComparer.OrdinalIgnoreCase);
 
@@ -56,7 +56,7 @@ public class ComposableModelBinder : IModelBinder
     return properties;
   }
 
-  private async Task<Dictionary<string, object?>> GetPropertyValuesAsync(
+  protected async Task<Dictionary<string, object?>> GetPropertyValuesAsync(
     Dictionary<string, ModelMetadata> metadata,
     ModelBindingContext bindingContext)
   {
