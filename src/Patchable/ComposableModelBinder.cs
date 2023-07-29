@@ -31,15 +31,30 @@ public class ComposableModelBinder : IModelBinder
     Dictionary<string, ModelMetadata> metadata = GetPropertyMetadata(bindingContext);
     Dictionary<string, object?> values = await GetPropertyValuesAsync(metadata, bindingContext);
 
-    foreach (var value in values)
-    {
-      metadata[value.Key].PropertySetter!.Invoke(model, value.Value);
-    }
+    PopulateModel(model, metadata, values);
 
     bindingContext.Result = ModelBindingResult.Success(model);
   }
 
-  protected static Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
+  /// <summary>
+  /// Populates the model. Override this method if you want to customise the way haw to
+  /// populate the model.
+  /// </summary>
+  /// <param name="model">The instance of the model.</param>
+  /// <param name="metadata">The dictionary of a property name and property metadata.</param>
+  /// <param name="values">The dictionary of a property name and a property value.</param>
+  protected virtual void PopulateModel(
+    object model,
+    Dictionary<string, ModelMetadata> metadata,
+    Dictionary<string, object?> values)
+  {
+    foreach (var value in values)
+    {
+      metadata[value.Key].PropertySetter!.Invoke(model, value.Value);
+    }
+  }
+
+  private static Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
   {
     Dictionary<string, ModelMetadata> properties = new(StringComparer.OrdinalIgnoreCase);
 
@@ -56,7 +71,7 @@ public class ComposableModelBinder : IModelBinder
     return properties;
   }
 
-  protected static async Task<Dictionary<string, object?>> GetPropertyValuesAsync(
+  private static async Task<Dictionary<string, object?>> GetPropertyValuesAsync(
     Dictionary<string, ModelMetadata> metadata,
     ModelBindingContext bindingContext)
   {

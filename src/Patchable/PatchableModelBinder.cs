@@ -14,20 +14,15 @@ namespace Patchable;
 /// </summary>
 public sealed class PatchableModelBinder : ComposableModelBinder
 {
-  public async override Task BindModelAsync(ModelBindingContext bindingContext)
+  /// <summary>
+  /// Populates the model.
+  /// </summary>
+  /// <param name="model">The instance of the model.</param>
+  /// <param name="metadata">The dictionary of a property name and property metadata.</param>
+  /// <param name="values">The dictionary of a property name and a property value.</param>
+  protected override void PopulateModel(object model, Dictionary<string, ModelMetadata> metadata, Dictionary<string, object?> values)
   {
-    object model = Activator.CreateInstance(bindingContext.ModelType)!;
-
-    Dictionary<string, ModelMetadata> metadata = GetPropertyMetadata(bindingContext);
-    Dictionary<string, object?> values = await GetPropertyValuesAsync(metadata, bindingContext);
-
-    foreach (var value in values)
-    {
-      metadata[value.Key].PropertySetter!.Invoke(model, value.Value);
-    }
-
+    base.PopulateModel(model, metadata, values);
     ((IPatchable)model).Properties = values.Select(value => value.Key).ToArray();
-
-    bindingContext.Result = ModelBindingResult.Success(model);
   }
 }
