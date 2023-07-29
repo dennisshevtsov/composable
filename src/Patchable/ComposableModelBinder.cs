@@ -39,7 +39,7 @@ public class ComposableModelBinder : IModelBinder
     bindingContext.Result = ModelBindingResult.Success(model);
   }
 
-  protected Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
+  protected static Dictionary<string, ModelMetadata> GetPropertyMetadata(ModelBindingContext bindingContext)
   {
     Dictionary<string, ModelMetadata> properties = new(StringComparer.OrdinalIgnoreCase);
 
@@ -56,7 +56,7 @@ public class ComposableModelBinder : IModelBinder
     return properties;
   }
 
-  protected async Task<Dictionary<string, object?>> GetPropertyValuesAsync(
+  protected static async Task<Dictionary<string, object?>> GetPropertyValuesAsync(
     Dictionary<string, ModelMetadata> metadata,
     ModelBindingContext bindingContext)
   {
@@ -69,7 +69,7 @@ public class ComposableModelBinder : IModelBinder
     return values;
   }
 
-  private async Task AddPropertyValuesFromBodyAsync(
+  private static async Task AddPropertyValuesFromBodyAsync(
     Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
     HttpRequest request)
@@ -99,7 +99,7 @@ public class ComposableModelBinder : IModelBinder
     }
   }
 
-  private void AddPropertyValuesFromRoute(
+  private static void AddPropertyValuesFromRoute(
     Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
     RouteValueDictionary routeValues)
@@ -119,7 +119,7 @@ public class ComposableModelBinder : IModelBinder
     }
   }
 
-  private void AddPropertyValuesFromQuery(
+  private static void AddPropertyValuesFromQuery(
     Dictionary<string, object?> values,
     Dictionary<string, ModelMetadata> metadata,
     IQueryCollection querystring)
