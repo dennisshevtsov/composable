@@ -26,6 +26,8 @@ public sealed class PatchableModelBinder : ComposableModelBinder
       metadata[value.Key].PropertySetter!.Invoke(model, value.Value);
     }
 
+    ((IPatchable)model).Properties = values.Select(value => value.Key).ToArray();
+
     bindingContext.Result = ModelBindingResult.Success(model);
   }
 }
