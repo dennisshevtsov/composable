@@ -24,7 +24,7 @@ public class ComposableModelBinder : IModelBinder
   /// </summary>
   /// <param name="bindingContext">A context that contains operating information for model binding and validation.</param>
   /// <returns>An instance of the <see cref="Task"/> that represents an asynchronous operation.</returns>
-  public async Task BindModelAsync(ModelBindingContext bindingContext)
+  public virtual async Task BindModelAsync(ModelBindingContext bindingContext)
   {
     object model = Activator.CreateInstance(bindingContext.ModelType)!;
 
