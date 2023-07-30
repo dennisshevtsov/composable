@@ -101,7 +101,7 @@ public sealed class PatchableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_NoRouteNoQueryNoBody_SetSuccessResult()
+  public async Task BindModelAsync_NoRouteNoQueryNoBody_SuccessResultSet()
   {
     // Arrange
 
@@ -128,7 +128,7 @@ public sealed class PatchableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_RouteParams_SetPropertiesFromRoute()
+  public async Task BindModelAsync_RouteParams_ModelPopulatedFromRoute()
   {
     // Arrange
     TestPatchableModel model = new()
@@ -169,7 +169,7 @@ public sealed class PatchableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_QueryStringParams_SetPropertiesFromString()
+  public async Task BindModelAsync_QueryStringParams_ModelPopulatedFromString()
   {
     // Arrange
     TestPatchableModel model = new()
@@ -211,7 +211,7 @@ public sealed class PatchableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_Body_SetPropertiesFromBody()
+  public async Task BindModelAsync_Body_ModelPopulatedFromBody()
   {
     // Arrange
     TestPatchableModel model = new()
