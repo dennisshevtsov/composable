@@ -100,7 +100,7 @@ public sealed class ComposableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_NoRouteNoQueryNoBody_SetSuccessResult()
+  public async Task BindModelAsync_NoRouteNoQueryNoBody_SuccessResultSet()
   {
     // Arrange
 
@@ -127,7 +127,7 @@ public sealed class ComposableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_RouteParams_SetPropertiesFromRoute()
+  public async Task BindModelAsync_RouteParams_ModelPopulatedFromRoute()
   {
     // Arrange
     TestComposableModel model = new()
@@ -168,7 +168,7 @@ public sealed class ComposableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_QueryStringParams_SetPropertiesFromString()
+  public async Task BindModelAsync_QueryStringParams_ModelPopulatedFromQueryString()
   {
     // Arrange
     TestComposableModel model = new()
@@ -210,7 +210,7 @@ public sealed class ComposableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_Body_SetPropertiesFromBody()
+  public async Task BindModelAsync_Body_ModelPopulatedFromBody()
   {
     // Arrange
     TestComposableModel model = new()
