@@ -336,4 +336,55 @@ public sealed class PatchableModelBinderTest
 
     _modelBindingContextMock.VerifySet(context => context.Result = It.Is(match));
   }
+
+  [TestMethod]
+  public async Task BindModelAsync_Body_PropertiesSetFromBody()
+  {
+    // Arrange
+    Dictionary<string, string> model = new()
+    {
+      { nameof(TestPatchableModel.Id), Guid.NewGuid().ToString() },
+    };
+
+    // No route params
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(new ActionContext()
+                            {
+                              RouteData = new RouteData(),
+                            })
+                            .Verifiable();
+
+    // No query params
+    _httpRequestMock.SetupGet(context => context.Query)
+                    .Returns(new QueryCollection())
+                    .Verifiable();
+
+    // Set up body
+    MemoryStream stream = new();
+    JsonSerializerOptions options = new()
+    {
+      PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+    await JsonSerializer.SerializeAsync(stream, model, options);
+    stream.Position = 0;
+
+    _httpRequestMock.SetupGet(context => context.Body)
+                    .Returns(stream)
+                    .Verifiable();
+
+    _httpRequestMock.SetupGet(context => context.ContentLength)
+                    .Returns(stream.Length)
+                    .Verifiable();
+
+    // Act
+    await _patchableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
+
+    // Assert
+    Expression<Func<ModelBindingResult, bool>> match =
+      result => result.Model != null &&
+                ((TestPatchableModel)result.Model).Properties.Contains(nameof(TestPatchableModel.Id));
+
+    _modelBindingContextMock.VerifySet(context => context.Result = It.Is(match));
+  }
 }
