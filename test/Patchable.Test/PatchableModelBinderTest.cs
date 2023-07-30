@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 // See LICENSE in the project root for license information.
 
+using System.Linq.Expressions;
 using System.Text.Json;
 
 using Microsoft.AspNetCore.Http;
@@ -257,5 +258,43 @@ public sealed class PatchableModelBinderTest
     // Assert
     _modelIdSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((Guid)x) == model.Id)));
     _modelNameSetterMock.Verify(setter => setter.Invoke(It.IsAny<object>(), It.Is<object>(x => ((string)x) == model.Name)));
+  }
+
+  [TestMethod]
+  public async Task BindModelAsync_RouteParams_PropertiesSetFromRoute()
+  {
+    // Arrange
+
+    // Set up route params
+    ActionContext actionContext = new()
+    {
+      RouteData = new RouteData
+      {
+        Values = {
+          { nameof(TestPatchableModel.Id) , Guid.NewGuid().ToString() },
+        },
+      },
+    };
+
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(actionContext);
+
+    // No query params
+    _httpRequestMock.SetupGet(context => context.Query)
+                    .Returns(new QueryCollection());
+
+    // No body
+    _httpRequestMock.SetupGet(request => request.ContentLength)
+                    .Returns(0);
+
+    // Act
+    await _patchableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
+
+    // Assert
+    Expression<Func<ModelBindingResult, bool>> match =
+      result => result.Model != null &&
+                ((TestPatchableModel)result.Model).Properties.Contains(nameof(TestPatchableModel.Id));
+
+    _modelBindingContextMock.VerifySet(context => context.Result = It.Is(match));
   }
 }
