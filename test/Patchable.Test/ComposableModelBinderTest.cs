@@ -168,7 +168,7 @@ public sealed class ComposableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_QueryStringParams_ModelPopulatedFromString()
+  public async Task BindModelAsync_QueryStringParams_ModelPopulatedFromQueryString()
   {
     // Arrange
     TestComposableModel model = new()

@@ -170,7 +170,7 @@ public sealed class PatchableModelBinderTest
   }
 
   [TestMethod]
-  public async Task BindModelAsync_QueryStringParams_ModelPopulatedFromString()
+  public async Task BindModelAsync_QueryStringParams_ModelPopulatedFromQueryString()
   {
     // Arrange
     TestPatchableModel model = new()
