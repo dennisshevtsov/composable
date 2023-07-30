@@ -297,4 +297,43 @@ public sealed class PatchableModelBinderTest
 
     _modelBindingContextMock.VerifySet(context => context.Result = It.Is(match));
   }
+
+  [TestMethod]
+  public async Task BindModelAsync_QueryStringParams_PropertiesSetFromQueryString()
+  {
+    // Arrange
+
+    // No route params
+    _modelBindingContextMock.SetupGet(context => context.ActionContext)
+                            .Returns(new ActionContext()
+                            {
+                              RouteData = new RouteData(),
+                            })
+                            .Verifiable();
+
+    // Set up query string
+    QueryCollection queryCollection = new(
+      new Dictionary<string, StringValues>
+      {
+        { nameof(TestPatchableModel.Id) , Guid.NewGuid().ToString() },
+      });
+
+    _httpRequestMock.SetupGet(context => context.Query)
+                    .Returns(queryCollection)
+                    .Verifiable();
+
+    // No body
+    _httpRequestMock.SetupGet(request => request.ContentLength)
+                    .Returns(0);
+
+    // Act
+    await _patchableModelBinder.BindModelAsync(_modelBindingContextMock.Object);
+
+    // Assert
+    Expression<Func<ModelBindingResult, bool>> match =
+      result => result.Model != null &&
+                ((TestPatchableModel)result.Model).Properties.Contains(nameof(TestPatchableModel.Id));
+
+    _modelBindingContextMock.VerifySet(context => context.Result = It.Is(match));
+  }
 }
