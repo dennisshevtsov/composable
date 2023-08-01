@@ -4,13 +4,13 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Patchable.Sample;
+namespace Patchable.Sample.Book;
 
 [Route("book")]
 [ApiController]
 public sealed class BookController : ControllerBase
 {
-  [HttpPatch("{bookId}", Name = nameof(BookController.PatchBook))]
+  [HttpPatch("{bookId}", Name = nameof(PatchBook))]
   public IActionResult PatchBook(PatchBookRequestDto requestDto)
   {
     return Ok();

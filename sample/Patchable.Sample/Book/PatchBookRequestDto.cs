@@ -7,16 +7,16 @@ using System.Text.Json.Serialization;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Patchable.Sample;
+namespace Patchable.Sample.Book;
 
 public sealed class PatchBookRequestDto : IPatchable
 {
   public PatchBookRequestDto()
   {
-    Title       = string.Empty;
+    Title = string.Empty;
     Description = null;
-    Pages       = 0;
-    Properties  = Array.Empty<string>();
+    Pages = 0;
+    Properties = Array.Empty<string>();
   }
 
   [FromRoute]
