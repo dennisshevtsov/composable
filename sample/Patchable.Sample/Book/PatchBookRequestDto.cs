@@ -2,37 +2,13 @@
 // Licensed under the MIT License.
 // See LICENSE in the project root for license information.
 
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-
-using Microsoft.AspNetCore.Mvc;
 
 namespace Patchable.Sample.Book;
 
-public sealed class PatchBookRequestDto : IPatchable
+public record class PatchBookRequestDto(
+  string Title, string Description, string[] Authors) : IPatchable
 {
-  public PatchBookRequestDto()
-  {
-    Title = string.Empty;
-    Description = null;
-    Pages = 0;
-    Properties = Array.Empty<string>();
-  }
-
-  [FromRoute]
-  [Required]
-  public Guid BoodId { get; set; }
-
-  [FromBody]
-  [Required]
-  public string Title { get; set; }
-
-  [FromBody]
-  public string? Description { get; set; }
-
-  [FromBody]
-  public int Pages { get; set; }
-
   [JsonIgnore]
-  public string[] Properties { get; set; }
+  public string[] Properties { get; set; } = Array.Empty<string>();
 }
