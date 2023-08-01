@@ -4,7 +4,4 @@
 
 namespace Patchable.Sample.Book;
 
-public sealed class GetBookRequestDto
-{
-  public Guid BookId { get; set; }
-}
+public record class GetBookRequestDto(Guid BookId);

@@ -4,25 +4,4 @@
 
 namespace Patchable.Sample.Book;
 
-public sealed class GetBookResponseDto
-{
-  public GetBookResponseDto(
-    Guid bookId,
-    string title,
-    string description,
-    string[] authors)
-  {
-    BookId = bookId;
-    Title  = title;
-    Description = description;
-    Authors = authors;
-  }
-
-  public Guid BookId { get; }
-
-  public string Title { get; }
-
-  public string Description { get; }
-
-  public string[] Authors { get; }
-}
+public record class GetBookResponseDto(Guid BookId, string Title, string Description, string[] Authors);
