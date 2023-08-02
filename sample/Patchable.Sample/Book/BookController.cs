@@ -10,10 +10,24 @@ namespace Patchable.Sample.Book;
 [ApiController]
 public sealed class BookController : ControllerBase
 {
+  private BookService _bookService;
+
+  public BookController(BookService bookService)
+  {
+    _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
+  }
+
   [HttpGet("{bookId}", Name = nameof(BookController.GetBook))]
   public IActionResult GetBook(GetBookRequestDto requestDto)
   {
-    return Ok();
+    BookEntity? bookEntity = _bookService.GetBook(requestDto.BookId);
+
+    if (bookEntity == null)
+    {
+      return NotFound();
+    }
+
+    return Ok(new GetBookResponseDto(bookEntity));
   }
 
   [HttpPost(Name = nameof(BookController.PostBook))]

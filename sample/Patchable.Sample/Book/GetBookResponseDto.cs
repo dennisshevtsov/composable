@@ -4,4 +4,9 @@
 
 namespace Patchable.Sample.Book;
 
-public record class GetBookResponseDto(Guid BookId, string Title, string Description, string[] Authors);
+public record class GetBookResponseDto(Guid BookId, string Title, string Description, string[] Authors)
+{
+  public GetBookResponseDto(BookEntity bookEntity)
+  : this(bookEntity.BookId, bookEntity.Title, bookEntity.Description, bookEntity.Authors)
+  { }
+};
