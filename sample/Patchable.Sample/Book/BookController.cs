@@ -33,16 +33,16 @@ public sealed class BookController : ControllerBase
   [HttpPost(Name = nameof(BookController.PostBook))]
   public IActionResult PostBook(PostBookRequestDto requestDto)
   {
-    return Ok();
-  }
-
-  [HttpPost(Name = nameof(BookController.PostBook))]
-  public IActionResult PostBook(PostBookRequestDto requestDto)
-  {
     BookEntity bookEntity = requestDto.ToBookEntity();
     _bookService.SaveBook(bookEntity);
 
     return CreatedAtRoute(nameof(BookController.GetBook), new GetBookResponseDto(bookEntity));
+  }
+
+  [HttpPut("{bookId}", Name = nameof(PutBook))]
+  public IActionResult PutBook(PutBookRequestDto requestDto)
+  {
+    return Ok();
   }
 
   [HttpPatch("{bookId}", Name = nameof(PatchBook))]
