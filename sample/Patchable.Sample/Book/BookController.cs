@@ -42,13 +42,33 @@ public sealed class BookController : ControllerBase
   [HttpPut("{bookId}", Name = nameof(PutBook))]
   public IActionResult PutBook(PutBookRequestDto requestDto)
   {
-    return Ok();
+    BookEntity? updatingBookEntity = _bookService.GetBook(requestDto.BookId);
+
+    if (updatingBookEntity == null)
+    {
+      return NotFound();
+    }
+
+    BookEntity updatedBookEntity = requestDto.ToBookEntity();
+    _bookService.SaveBook(updatedBookEntity);
+
+    return NoContent();
   }
 
   [HttpPatch("{bookId}", Name = nameof(PatchBook))]
   public IActionResult PatchBook(PatchBookRequestDto requestDto)
   {
-    return Ok();
+    BookEntity? updatingBookEntity = _bookService.GetBook(requestDto.BookId);
+
+    if (updatingBookEntity == null)
+    {
+      return NotFound();
+    }
+
+    BookEntity updatedBookEntity = requestDto.Patch(updatingBookEntity);
+    _bookService.SaveBook(updatedBookEntity);
+
+    return NoContent();
   }
 
   [HttpDelete("{bookId}", Name = nameof(DeleteBook))]

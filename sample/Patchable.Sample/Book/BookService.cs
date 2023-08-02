@@ -11,5 +11,5 @@ public sealed class BookService
   public BookEntity? GetBook(Guid bookId) =>
     _books.TryGetValue(bookId, out BookEntity? book) ? book : null;
 
-  public void SaveBook(BookEntity book) => _books[book.BookId] = book;
+  public void SaveBook(BookEntity bookEntity) => _books[bookEntity.BookId] = bookEntity;
 }

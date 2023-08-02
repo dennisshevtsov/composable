@@ -7,8 +7,14 @@ using System.Text.Json.Serialization;
 namespace Patchable.Sample.Book;
 
 public record class PatchBookRequestDto(
-  string Title, string Description, string[] Authors) : IPatchable
+  Guid BookId, string Title, string Description, string[] Authors) : IPatchable
 {
   [JsonIgnore]
   public string[] Properties { get; set; } = Array.Empty<string>();
+
+  internal BookEntity Patch(BookEntity bookEntity) => new(
+    bookEntity.BookId,
+    Properties.Contains(nameof(Title)) ? Title : bookEntity.Title,
+    Properties.Contains(nameof(Description)) ? Description : bookEntity.Description,
+    Properties.Contains(nameof(Authors)) ? Authors : bookEntity.Authors);
 }
