@@ -74,6 +74,8 @@ public sealed class BookController : ControllerBase
   [HttpDelete("{bookId}", Name = nameof(DeleteBook))]
   public IActionResult DeleteBook(DeleteBookRequestDto requestDto)
   {
-    return Ok();
+    _bookRepository.RemoveBook(requestDto.BookId);
+
+    return NoContent();
   }
 }
