@@ -10,17 +10,17 @@ namespace Patchable.Sample.Book;
 [ApiController]
 public sealed class BookController : ControllerBase
 {
-  private BookRepository _bookService;
+  private BookRepository _bookRepository;
 
-  public BookController(BookRepository bookService)
+  public BookController(BookRepository bookRepository)
   {
-    _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
+    _bookRepository = bookRepository ?? throw new ArgumentNullException(nameof(bookRepository));
   }
 
   [HttpGet("{bookId}", Name = nameof(BookController.GetBook))]
   public IActionResult GetBook(GetBookRequestDto requestDto)
   {
-    BookEntity? bookEntity = _bookService.GetBook(requestDto.BookId);
+    BookEntity? bookEntity = _bookRepository.GetBook(requestDto.BookId);
 
     if (bookEntity == null)
     {
@@ -34,7 +34,7 @@ public sealed class BookController : ControllerBase
   public IActionResult PostBook(PostBookRequestDto requestDto)
   {
     BookEntity bookEntity = requestDto.ToBookEntity();
-    _bookService.SaveBook(bookEntity);
+    _bookRepository.SaveBook(bookEntity);
 
     return CreatedAtRoute(nameof(BookController.GetBook), new GetBookResponseDto(bookEntity));
   }
@@ -42,7 +42,7 @@ public sealed class BookController : ControllerBase
   [HttpPut("{bookId}", Name = nameof(PutBook))]
   public IActionResult PutBook(PutBookRequestDto requestDto)
   {
-    BookEntity? updatingBookEntity = _bookService.GetBook(requestDto.BookId);
+    BookEntity? updatingBookEntity = _bookRepository.GetBook(requestDto.BookId);
 
     if (updatingBookEntity == null)
     {
@@ -50,7 +50,7 @@ public sealed class BookController : ControllerBase
     }
 
     BookEntity updatedBookEntity = requestDto.ToBookEntity();
-    _bookService.SaveBook(updatedBookEntity);
+    _bookRepository.SaveBook(updatedBookEntity);
 
     return NoContent();
   }
@@ -58,7 +58,7 @@ public sealed class BookController : ControllerBase
   [HttpPatch("{bookId}", Name = nameof(PatchBook))]
   public IActionResult PatchBook(PatchBookRequestDto requestDto)
   {
-    BookEntity? updatingBookEntity = _bookService.GetBook(requestDto.BookId);
+    BookEntity? updatingBookEntity = _bookRepository.GetBook(requestDto.BookId);
 
     if (updatingBookEntity == null)
     {
@@ -66,7 +66,7 @@ public sealed class BookController : ControllerBase
     }
 
     BookEntity updatedBookEntity = requestDto.Patch(updatingBookEntity);
-    _bookService.SaveBook(updatedBookEntity);
+    _bookRepository.SaveBook(updatedBookEntity);
 
     return NoContent();
   }
