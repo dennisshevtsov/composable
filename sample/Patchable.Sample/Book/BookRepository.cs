@@ -11,7 +11,7 @@ public sealed class BookRepository
   public BookEntity? GetBook(Guid bookId) =>
     _books.TryGetValue(bookId, out BookEntity? book) ? book : null;
 
-  public void SaveBook(BookEntity bookEntity) => _books[bookEntity.BookId] = bookEntity;
+  public void AddOrUpdateBook(BookEntity bookEntity) => _books[bookEntity.BookId] = bookEntity;
 
   public void RemoveBook(Guid bookId) => _books.Remove(bookId);
 }

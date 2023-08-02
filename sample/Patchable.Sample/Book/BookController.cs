@@ -34,7 +34,7 @@ public sealed class BookController : ControllerBase
   public IActionResult PostBook(PostBookRequestDto requestDto)
   {
     BookEntity bookEntity = requestDto.ToBookEntity();
-    _bookRepository.SaveBook(bookEntity);
+    _bookRepository.AddOrUpdateBook(bookEntity);
 
     return CreatedAtRoute(nameof(BookController.GetBook), new GetBookResponseDto(bookEntity));
   }
@@ -50,7 +50,7 @@ public sealed class BookController : ControllerBase
     }
 
     BookEntity updatedBookEntity = requestDto.ToBookEntity();
-    _bookRepository.SaveBook(updatedBookEntity);
+    _bookRepository.AddOrUpdateBook(updatedBookEntity);
 
     return NoContent();
   }
@@ -66,7 +66,7 @@ public sealed class BookController : ControllerBase
     }
 
     BookEntity updatedBookEntity = requestDto.Patch(updatingBookEntity);
-    _bookRepository.SaveBook(updatedBookEntity);
+    _bookRepository.AddOrUpdateBook(updatedBookEntity);
 
     return NoContent();
   }
