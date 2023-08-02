@@ -6,7 +6,7 @@ using Patchable.Sample.Book;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(options => options.AddPatchable());
-builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<BookRepository>();
 
 WebApplication app = builder.Build();
 app.Run();

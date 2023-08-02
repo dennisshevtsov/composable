@@ -4,7 +4,7 @@
 
 namespace Patchable.Sample.Book;
 
-public sealed class BookService
+public sealed class BookRepository
 {
   private readonly Dictionary<Guid, BookEntity> _books = new();
 

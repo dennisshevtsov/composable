@@ -10,9 +10,9 @@ namespace Patchable.Sample.Book;
 [ApiController]
 public sealed class BookController : ControllerBase
 {
-  private BookService _bookService;
+  private BookRepository _bookService;
 
-  public BookController(BookService bookService)
+  public BookController(BookRepository bookService)
   {
     _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
   }
