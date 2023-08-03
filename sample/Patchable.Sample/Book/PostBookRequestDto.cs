@@ -4,7 +4,9 @@
 
 namespace Patchable.Sample.Book;
 
-public record class PostBookRequestDto(string Title, string Description, string[] Authors)
+public record class PostBookRequestDto(string Title, string Description, string[] Authors) : IComposable
 {
+  public PostBookRequestDto() : this(string.Empty, string.Empty, Array.Empty<string>()) { }
+
   internal BookEntity ToBookEntity() => new(Guid.NewGuid(), Title, Description, Authors);
 }

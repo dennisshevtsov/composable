@@ -4,7 +4,9 @@
 
 namespace Patchable.Sample.Book;
 
-public record class GetBookRequestDto(Guid BookId)
+public record class GetBookRequestDto(Guid BookId) : IComposable
 {
-  public GetBookRequestDto(BookEntity bookEntity) : this (bookEntity.BookId) { }
+  public GetBookRequestDto() : this(Guid.Empty) { }
+
+  public GetBookRequestDto(BookEntity bookEntity) : this(bookEntity.BookId) { }
 }

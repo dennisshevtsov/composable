@@ -6,8 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Patchable.Sample.Book;
 
-public record class PatchBookRequestDto(
-  Guid BookId, string Title, string Description, string[] Authors) : IPatchable
+public record class PatchBookRequestDto(Guid BookId, string Title, string Description, string[] Authors) : IPatchable
 {
   [JsonIgnore]
   public string[] Properties { get; set; } = Array.Empty<string>();
