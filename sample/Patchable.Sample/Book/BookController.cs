@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Patchable.Sample.Book;
 
-[Route("book")]
+[Route("api/book")]
 [ApiController]
 public sealed class BookController : ControllerBase
 {
