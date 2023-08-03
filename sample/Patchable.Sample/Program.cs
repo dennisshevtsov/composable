@@ -9,4 +9,6 @@ builder.Services.AddControllers(options => options.AddPatchable());
 builder.Services.AddSingleton<BookRepository>();
 
 WebApplication app = builder.Build();
+app.UseRouting();
+app.MapControllers();
 app.Run();
