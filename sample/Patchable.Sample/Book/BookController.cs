@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Patchable.Sample.Book;
 
-[Route("book")]
+[Route("api/book")]
 [ApiController]
 public sealed class BookController : ControllerBase
 {
@@ -36,7 +36,10 @@ public sealed class BookController : ControllerBase
     BookEntity bookEntity = requestDto.ToBookEntity();
     _bookRepository.AddOrUpdateBook(bookEntity);
 
-    return CreatedAtRoute(nameof(BookController.GetBook), new GetBookResponseDto(bookEntity));
+    return CreatedAtRoute(
+      nameof(BookController.GetBook),
+      new GetBookRequestDto(bookEntity),
+      new GetBookResponseDto(bookEntity));
   }
 
   [HttpPut("{bookId}", Name = nameof(PutBook))]

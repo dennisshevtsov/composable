@@ -10,4 +10,8 @@
     <ProjectReference Include="..\..\src\Patchable\Patchable.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Test\" />
+  </ItemGroup>
+
 </Project>

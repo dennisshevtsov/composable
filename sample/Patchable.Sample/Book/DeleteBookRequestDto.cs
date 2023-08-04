@@ -4,4 +4,7 @@
 
 namespace Patchable.Sample.Book;
 
-public record DeleteBookRequestDto(Guid BookId);
+public record DeleteBookRequestDto(Guid BookId) : IComposable
+{
+  public DeleteBookRequestDto() : this(Guid.Empty) { }
+}

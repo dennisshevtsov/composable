@@ -6,15 +6,16 @@ using System.Text.Json.Serialization;
 
 namespace Patchable.Sample.Book;
 
-public record class PatchBookRequestDto(
-  Guid BookId, string Title, string Description, string[] Authors) : IPatchable
+public record class PatchBookRequestDto(Guid BookId, string Title, string Description, string[] Authors) : IPatchable
 {
+  public PatchBookRequestDto() : this(Guid.Empty, string.Empty, string.Empty, Array.Empty<string>()) { }
+
   [JsonIgnore]
   public string[] Properties { get; set; } = Array.Empty<string>();
 
   internal BookEntity Patch(BookEntity bookEntity) => new(
     bookEntity.BookId,
-    Properties.Contains(nameof(Title)) ? Title : bookEntity.Title,
-    Properties.Contains(nameof(Description)) ? Description : bookEntity.Description,
-    Properties.Contains(nameof(Authors)) ? Authors : bookEntity.Authors);
+    Properties.Contains(nameof(Title), StringComparer.OrdinalIgnoreCase) ? Title : bookEntity.Title,
+    Properties.Contains(nameof(Description), StringComparer.OrdinalIgnoreCase) ? Description : bookEntity.Description,
+    Properties.Contains(nameof(Authors), StringComparer.OrdinalIgnoreCase) ? Authors : bookEntity.Authors);
 }
