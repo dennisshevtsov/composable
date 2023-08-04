@@ -6,5 +6,7 @@ namespace Patchable.Sample.Book;
 
 public record PutBookRequestDto(Guid BookId, string Title, string Description, string[] Authors) : IComposable
 {
+  public PutBookRequestDto() : this(Guid.Empty, string.Empty, string.Empty, Array.Empty<string>()) { }
+
   internal BookEntity ToBookEntity() => new(BookId, Title, Description, Authors);
 }
