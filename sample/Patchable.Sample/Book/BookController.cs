@@ -37,7 +37,7 @@ public sealed class BookController : ControllerBase
     _bookRepository.AddOrUpdateBook(bookEntity);
 
     return CreatedAtRoute(
-      nameof(BookController.GetBook), 
+      nameof(BookController.GetBook),
       new GetBookRequestDto(bookEntity),
       new GetBookResponseDto(bookEntity));
   }

@@ -35,37 +35,37 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="Add Book" enabled="true">
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="Post Book" enabled="true">
           <collectionProp name="Arguments.arguments">
-            <elementProp name="addBookTitle" elementType="Argument">
-              <stringProp name="Argument.name">addBookTitle</stringProp>
+            <elementProp name="postBookTitle" elementType="Argument">
+              <stringProp name="Argument.name">postBookTitle</stringProp>
               <stringProp name="Argument.value">${__RandomString(5, ABCDEFGHIJKLMNOPQRSTUVXYZ)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
-            <elementProp name="addBookDescription" elementType="Argument">
-              <stringProp name="Argument.name">addBookDescription</stringProp>
+            <elementProp name="postBookDescription" elementType="Argument">
+              <stringProp name="Argument.name">postBookDescription</stringProp>
               <stringProp name="Argument.value">${__RandomString(5, ABCDEFGHIJKLMNOPQRSTUVXYZ)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
-            <elementProp name="addBookAuthor" elementType="Argument">
-              <stringProp name="Argument.name">addBookAuthor</stringProp>
+            <elementProp name="postBookAuthor" elementType="Argument">
+              <stringProp name="Argument.name">postBookAuthor</stringProp>
               <stringProp name="Argument.value">${__RandomString(5, ABCDEFGHIJKLMNOPQRSTUVXYZ)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
           </collectionProp>
         </Arguments>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add Book" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Post Book" enabled="true">
           <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
-	&quot;title&quot;      : &quot;${addBookTitle}&quot;,&#xd;
-	&quot;description&quot;: &quot;${addBookDescription}&quot;,&#xd;
+	&quot;title&quot;      : &quot;${postBookTitle}&quot;,&#xd;
+	&quot;description&quot;: &quot;${postBookDescription}&quot;,&#xd;
 	&quot;authors&quot;    : [&#xd;
-		&quot;${addBookAuthor}&quot;&#xd;
+		&quot;${postBookAuthor}&quot;&#xd;
 	]&#xd;
 }&#xd;
 </stringProp>
