@@ -2,7 +2,7 @@
 
 ## About Project
 The project contains implementations of two model binders.
-- `ComposableModelBinder` allows to combine data in one model from different source: the body, the route and the query string to the HTTP request.
+- `ComposableModelBinder` allows to combine data in one model from different source: the body, the route and the query string of the HTTP request.
 - `PatchableModelBinder` allows to access the list of properties which were passed in the HTTP request. `PatchableModelBinder` inherits `ComposableModelBinder`.
 
 ## How to use
@@ -10,14 +10,14 @@ The project contains implementations of two model binders.
 ```csharp
 builder.Services.AddControllers(options => options.AddPatchable());
 ```
-- Inherit a model from the <see cref="IComposable"/> if you need a model that binds to parameters from the body, the route and the query string of the HTTP request in one object. The data will bind with priority. The priority from the lowest to highest is the body, the route, and the query string.
+- Inherit a model from the `IComposable` if you need a model that binds to parameters from the body, the route and the query string of the HTTP request in one object. The data will bind with priority. The priority from the lowest to highest is the body, the route, and the query string.
 ```csharp
 public record class PostBookRequestDto(string Title, string Description, string[] Authors) : IComposable
 {
   public PostBookRequestDto() : this(string.Empty, string.Empty, Array.Empty<string>()) { }
 }
 ```
-- Inherit a model from the <see cref="IPatchable"/> if you need a model that binds to parameters from the body, the route and the query string of the HTTP request in one object and/or a list of properties that have been populated from the HTTP request.
+- Inherit a model from the `IPatchable` if you need a model that binds to parameters from the body, the route and the query string of the HTTP request in one object and/or a list of properties that have been populated from the HTTP request.
 ```csharp
 public record class PatchBookRequestDto(Guid BookId, string Title, string Description, string[] Authors) : IPatchable
 {
