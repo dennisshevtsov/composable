@@ -27,4 +27,4 @@ public record class PatchBookRequestDto(Guid BookId, string Title, string Descri
 }
 ```
 
-For more information you might see [a sample](https://github.com/dennisshevtsov/patchable/tree/main/sample/Patchable.Sample). This sample contains a JMeter [test](https://github.com/dennisshevtsov/patchable/blob/main/sample/Patchable.Sample/Test/api-test.jmx) which can be run to check the API.
+For more information you might check [a sample](https://github.com/dennisshevtsov/patchable/tree/main/sample/Patchable.Sample). This sample contains a JMeter [test](https://github.com/dennisshevtsov/patchable/blob/main/sample/Patchable.Sample/Test/api-test.jmx) which shows how the sample works.
