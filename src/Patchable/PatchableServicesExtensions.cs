@@ -21,5 +21,7 @@ public static class PatchableServicesExtensions
   {
     options.ModelBinderProviders.Insert(0, new PatchableModelBinderProvider());
     options.ModelBinderProviders.Insert(1, new ComposableModelBinderProvider());
+
+    options.Filters.Insert(0, new SuppressValidationFilter());
   }
 }
