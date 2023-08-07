@@ -2,13 +2,23 @@
 // Licensed under the MIT License.
 // See LICENSE in the project root for license information.
 
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Patchable.Sample.Book;
 
-public record class PatchBookRequestDto(Guid BookId, string Title, string Description, string[] Authors) : IPatchable
+public record class PatchBookRequestDto : IPatchable
 {
-  public PatchBookRequestDto() : this(Guid.Empty, string.Empty, string.Empty, Array.Empty<string>()) { }
+  public Guid BookId { get; set; }
+
+  [MinLength(1), MaxLength(255)]
+  public string Title { get; set; } = string.Empty;
+
+  [MaxLength(255)]
+  public string Description { get; set; } = string.Empty;
+
+  [Required, MinLength(1)]
+  public string[] Authors { get; set; } = Array.Empty<string>();
 
   [JsonIgnore]
   public string[] Properties { get; set; } = Array.Empty<string>();
