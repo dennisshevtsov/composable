@@ -33,7 +33,7 @@ public sealed class SuppressValidationFilter : IActionFilter, IOrderedFilter
 
       if (requestDto != null)
       {
-        ISet<string> properties = ((IPatchable)requestDto).Properties.ToHashSet();
+        ISet<string> properties = ((IPatchable)requestDto).Properties.ToHashSet(StringComparer.OrdinalIgnoreCase);
         IList<string> errors = context.ModelState.Select(error => error.Key)
                                                  .Where(error => !properties.Contains(error))
                                                  .ToList();
