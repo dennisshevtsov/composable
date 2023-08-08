@@ -2,11 +2,22 @@
 // Licensed under the MIT License.
 // See LICENSE in the project root for license information.
 
+using System.ComponentModel.DataAnnotations;
+
 namespace Patchable.Sample.Book;
 
-public record PutBookRequestDto(Guid BookId, string Title, string Description, string[] Authors) : IComposable
+public record PutBookRequestDto : IComposable
 {
-  public PutBookRequestDto() : this(Guid.Empty, string.Empty, string.Empty, Array.Empty<string>()) { }
+  public Guid BookId { get; set; }
+
+  [Required, MinLength(1), MaxLength(255)]
+  public string Title { get; set; } = string.Empty;
+
+  [MaxLength(255)]
+  public string Description { get; set; } = string.Empty;
+
+  [Required, MinLength(1)]
+  public string[] Authors { get; set; } = Array.Empty<string>();
 
   internal BookEntity ToBookEntity() => new(BookId, Title, Description, Authors);
 }
