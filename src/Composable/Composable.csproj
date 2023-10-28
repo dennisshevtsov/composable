@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <PackageId>Patchable</PackageId>
+    <PackageId>Composable</PackageId>
     <Version>1.0.0</Version>
     <Authors>Dennis Shevtsov</Authors>
     <RepositoryUrl>https://github.com/dennisshevtsov/composable</RepositoryUrl>
