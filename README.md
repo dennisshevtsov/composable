@@ -1,4 +1,4 @@
-# Patchable
+# Composable
 
 ## About Project
 The project contains implementations of two model binders.
@@ -8,7 +8,7 @@ The project contains implementations of two model binders.
 ## How to use
 - To enable these binders you just need to add this code in your pipeline:
 ```csharp
-builder.Services.AddControllers(options => options.AddPatchable());
+builder.Services.AddControllers(options => options.AddComposable());
 ```
 - Inherit a model from the `IComposable` if you need a model that binds to parameters from the body, the route and the query string of the HTTP request in one object. The data will bind with priority. The priority from the lowest to highest is the body, the route, and the query string.
 ```csharp
